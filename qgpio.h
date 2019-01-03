@@ -55,7 +55,7 @@ public:
      * @brief getInstance
      * @return singleton instance of QGpio class
      */
-    static QGpio& getInstance();
+    static QGpio *getInstance();
 
     /**
      * @brief init. Map GPIO ports to an address
@@ -76,7 +76,7 @@ public:
      * @param pud
      * @return pointer to QGpioPort
      */
-    QPointer<QGpioPort> allocateGpioPort(int port, GpioDirection direction, GpioPullUpDown pud);
+    QPointer<QGpioPort> allocateGpioPort(int port, GpioDirection direction, GpioPullUpDown pud = PUD_OFF);
 
 
     /**

@@ -27,12 +27,12 @@ volatile uint32_t* QGpio::m_gpioMap = nullptr;
 QMap<int, QPointer<QGpioPort> > QGpio::m_PortsAllocated;
 QMap<int, QPointer<QGpioPort> > QGpio::m_EventFDsAllocated;
 
-QGpio &QGpio::getInstance()
+QGpio* QGpio::getInstance()
 {
     QMutex mutex;
     QMutexLocker lock(&mutex);  // to unlock mutex on exit
     static QGpio instance;
-    return instance;
+    return &instance;
 }
 
 QGpio::InitResult QGpio::init() const

@@ -20,7 +20,7 @@ public:
     void pwmSetDutyCycle(float dutycycle);
     void pwmSetFrequency(float freq);
 
-    void startPwm();
+    void startPwm(float dutyCycle = 0.0);
     void stopPwm();
 
     /**

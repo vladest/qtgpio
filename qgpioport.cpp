@@ -219,8 +219,11 @@ void QGpioPort::pwmSetFrequency(float freq)
     pwmCalculateTimes();
 }
 
-void QGpioPort::startPwm()
+void QGpioPort::startPwm(float dutyCycle)
 {
+    if (dutyCycle > 0.0) {
+        pwmSetDutyCycle(dutyCycle);
+    }
     if (m_pwmRunner == nullptr) {
         pwmCalculateTimes();
         m_pwmRunner = QThread::create([&]{
@@ -234,7 +237,8 @@ void QGpioPort::stopPwm()
 {
     if (m_pwmRunner != nullptr) {
         m_pwmRunner->requestInterruption();
-        m_pwmRunner->deleteLater();
+        m_pwmRunner->wait(m_pwmReqOn + m_pwmReqOff + 100);
+        delete m_pwmRunner;
         m_pwmRunner = nullptr;
     }
 }
@@ -295,12 +299,12 @@ void QGpioPort::pwmThreadRun()
 
 #define x_write(fd, buf, len) do {                                  \
     size_t x_write_len = (len);                                     \
-                                                                    \
+    \
     if ((size_t)write((fd), (buf), x_write_len) != x_write_len) {   \
-        close(fd);                                                  \
-        return (-1);                                                \
+    close(fd);                                                  \
+    return (-1);                                                \
     }                                                               \
-} while (/* CONSTCOND */ 0)
+    } while (/* CONSTCOND */ 0)
 
 bool QGpioPort::gpioExport()
 {
@@ -316,7 +320,7 @@ bool QGpioPort::gpioExport()
     }
 
     if ((fd = open("/sys/class/gpio/export", O_WRONLY)) < 0) {
-       return false;
+        return false;
     }
 
     len = snprintf(str_gpio, sizeof(str_gpio), "%d", m_port);
