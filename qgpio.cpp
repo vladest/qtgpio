@@ -1,15 +1,19 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <fcntl.h>
+#include <sys/epoll.h>
 #include <sys/mman.h>
 #include <string.h>
+#include <sys/time.h>
 
 #include "qgpio.h"
 #include "qgpioport.h"
 
 #include <QMutexLocker>
 #include <QFile>
+#include <QDateTime>
 #include <QDebug>
 
 #define BCM2708_PERI_BASE_DEFAULT   0x20000000
@@ -21,6 +25,7 @@
 
 volatile uint32_t* QGpio::m_gpioMap = nullptr;
 QMap<int, QPointer<QGpioPort> > QGpio::m_PortsAllocated;
+QMap<int, QPointer<QGpioPort> > QGpio::m_EventFDsAllocated;
 
 QGpio &QGpio::getInstance()
 {
@@ -105,12 +110,12 @@ void QGpio::deinit()
     }
 }
 
-QPointer<QGpioPort> QGpio::allocateGpioPort(int port, GpioDirection direction, PullUpDown pud)
+QPointer<QGpioPort> QGpio::allocateGpioPort(int port, GpioDirection direction, GpioPullUpDown pud)
 {
     QPointer<QGpioPort> _port = m_PortsAllocated.value(port, nullptr);
     if (_port == nullptr) {
         _port = new QGpioPort(port, direction, pud);
-        _port->setGpio(this);
+        _port->setGpioParent(this);
         m_PortsAllocated[port] = _port;
     }
     return _port;
@@ -129,6 +134,94 @@ QGpio::~QGpio()
 const QGpio &QGpio::operator=(const QGpio &)
 {
     return *this;
+}
+
+void QGpio::removeFromInputEventsThread(QGpioPort *gpioPort)
+{
+    struct epoll_event ev;
+    // add to epoll fd
+    ev.events = EPOLLIN | EPOLLET | EPOLLPRI;
+    ev.data.fd = gpioPort->getValueFd();
+    epoll_ctl(m_epollFd, EPOLL_CTL_DEL, ev.data.fd, &ev);
+    m_EventFDsAllocated.remove(ev.data.fd);
+    if (m_EventFDsAllocated.isEmpty() && m_eventsRunner != nullptr) {
+        m_eventsRunner->requestInterruption();
+        m_eventsRunner->deleteLater();
+        m_eventsRunner = nullptr;
+    }
+}
+
+void QGpio::addToInputEventsThread(QGpioPort *gpioPort)
+{
+    // create epfd_thread if not already open
+    if (m_epollFd == -1) {
+        m_epollFd = epoll_create(1);
+        if (m_epollFd == -1) {
+            qWarning() << "Error creating epoll" << errno;
+            return;
+        }
+    }
+
+    struct epoll_event ev;
+    // add to epoll fd
+    ev.events = EPOLLIN | EPOLLET | EPOLLPRI;
+    ev.data.fd = gpioPort->getValueFd();
+    m_EventFDsAllocated[ev.data.fd] = gpioPort;
+    if (epoll_ctl(m_epollFd, EPOLL_CTL_ADD, ev.data.fd, &ev) == -1) {
+        gpioPort->removeEdgeDetect();
+        return;
+    }
+    if (m_eventsRunner == nullptr) {
+        m_eventsRunner = QThread::create([&]{
+            inputEventThreadFunc();
+        });
+        m_eventsRunner->start(QThread::TimeCriticalPriority);
+    }
+}
+
+void QGpio::inputEventThreadFunc() {
+    struct epoll_event events;
+    char buf;
+    struct timeval tv_timenow;
+    quint64 timenow = 0;
+
+    while (!m_eventsRunner->isInterruptionRequested()) {
+        int epoll_ret = epoll_wait(m_epollFd, &events, 1, -1);
+        if (epoll_ret > 0) {
+            lseek(events.data.fd, 0, SEEK_SET);
+            if (read(events.data.fd, &buf, 1) != 1) {
+                m_eventsRunner->requestInterruption();
+            }
+            QGpioPort* g = m_EventFDsAllocated.value(events.data.fd);
+            if (g == nullptr) {
+                qWarning() << "No GPIO port associated with FD" << events.data.fd;
+            }
+            if (g->getInitialTrigger()) {     // ignore first epoll trigger
+                g->setInitialTrigger(true);
+            } else {
+                gettimeofday(&tv_timenow, NULL);
+                timenow = tv_timenow.tv_sec*1E6 + tv_timenow.tv_usec;
+                const quint64 ts = g->getLastCallTimestamp();
+                if (g->getBouncetime() == -666 || timenow - ts >
+                        (unsigned int)g->getBouncetime()*1000 || ts == 0 ||
+                        ts > timenow) {
+                    g->setLastCallTimestamp(timenow);
+                    emit inputEvent(g);
+//                    event_occurred[g->gpio] = 1;
+//                    run_callbacks(g->gpio);
+                }
+            }
+        } else if (epoll_ret == -1) {
+            /*  If a signal is received while we are waiting,
+                epoll_wait will return with an EINTR error.
+                Just try again in that case.  */
+            if (errno == EINTR) {
+                continue;
+            }
+            m_eventsRunner->requestInterruption();
+        }
+    }
+    qDebug() << Q_FUNC_INFO << " thread stopped";
 }
 
 uint32_t *QGpio::getGpioMap()
