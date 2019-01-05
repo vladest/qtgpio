@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "rpi/bcm2835.h"
+
 #define FSEL_OFFSET                 0   // 0x0000
 #define SET_OFFSET                  7   // 0x001c / 4
 #define CLR_OFFSET                  10  // 0x0028 / 4
@@ -121,42 +123,28 @@ void QGpioPort::setLowEvent(bool enable)
 
 void QGpioPort::setPullupdn(QGpio::GpioPullUpDown pud)
 {
-    int clk_offset = PULLUPDNCLK_OFFSET + (m_port / 32);
-    int shift = (m_port % 32);
-
-    if (pud == QGpio::PUD_DOWN)
-        *(m_gpio->getGpioMap()+PULLUPDN_OFFSET) = (*(m_gpio->getGpioMap()+PULLUPDN_OFFSET) & ~3) | QGpio::PUD_DOWN;
-    else if (pud == QGpio::PUD_UP)
-        *(m_gpio->getGpioMap()+PULLUPDN_OFFSET) = (*(m_gpio->getGpioMap()+PULLUPDN_OFFSET) & ~3) | QGpio::PUD_UP;
-    else  // pud == PUD_OFF
-        *(m_gpio->getGpioMap()+PULLUPDN_OFFSET) &= ~3;
-
-    short_wait();
-    *(m_gpio->getGpioMap() + clk_offset) = 1 << shift;
-    short_wait();
-    *(m_gpio->getGpioMap() + PULLUPDN_OFFSET) &= ~3;
-    *(m_gpio->getGpioMap() + clk_offset) = 0;
+    bcm2835_gpio_set_pud(m_port, pud);
     m_pud = pud;
 }
 
 void QGpioPort::setup()
 {
-    int offset = FSEL_OFFSET + (m_port / 10);
-    int shift = (m_port % 10) * 3;
-
     setPullupdn(m_pud);
-    if (m_direction == QGpio::DIRECTION_OUTPUT)
-        *(m_gpio->getGpioMap() + offset) = (*(m_gpio->getGpioMap() + offset) & ~(7 << shift)) | (1 << shift);
-    else  // direction == INPUT
-        *(m_gpio->getGpioMap() + offset) = (*(m_gpio->getGpioMap() + offset) & ~(7 << shift));
+    setDirection(m_direction);
 }
 
-// Contribution by Eric Ptak <trouch@trouch.com>
+void QGpioPort::setDirection(QGpio::GpioDirection direction)
+{
+    m_direction = direction;
+    bcm2835_gpio_fsel(m_port, m_direction);
+}
+
 QGpio::GpioDirection QGpioPort::getDirection()
 {
-    int offset = FSEL_OFFSET + (m_port / 10);
-    int shift = (m_port % 10) * 3;
-    int value = *(m_gpio->getGpioMap() + offset);
+    // no such function in original bcm2835 library
+    volatile uint32_t* paddr = m_gpio->getGpioMap() + BCM2835_GPFSEL0/4 + (m_port/10);
+    uint8_t   shift = (m_port % 10) * 3;
+    uint32_t value = bcm2835_peri_read(paddr);
     value >>= shift;
     value &= 7;
     return (QGpio::GpioDirection)value; // 0=input, 1=output, 4=alt0
@@ -164,26 +152,15 @@ QGpio::GpioDirection QGpioPort::getDirection()
 
 void QGpioPort::setValue(QGpio::GpioValue value)
 {
-    int offset, shift;
-
     if (value == QGpio::VALUE_HIGH) // value == HIGH
-        offset = SET_OFFSET + (m_port / 32);
-    else       // value == LOW
-        offset = CLR_OFFSET + (m_port / 32);
-
-    shift = (m_port % 32);
-
-    *(m_gpio->getGpioMap() + offset) = 1 << shift;
+        bcm2835_gpio_set(m_port);
+    else
+        bcm2835_gpio_clr(m_port);
 }
 
 QGpio::GpioValue QGpioPort::value()
 {
-    int offset, value, mask;
-
-    offset = PINLEVEL_OFFSET + (m_port / 32);
-    mask = (1 << m_port % 32);
-    value = *(m_gpio->getGpioMap() + offset) & mask;
-    return (QGpio::GpioValue)value;
+    return (QGpio::GpioValue)bcm2835_gpio_lev(m_port);
 }
 
 //PWM part
@@ -192,6 +169,7 @@ void QGpioPort::pwmCalculateTimes()
 {
     m_pwmReqOn = (long long)(m_pwmDutyCycle * m_pwmSliceTime * 1000.0);
     m_pwmReqOff = (long long)((100.0 - m_pwmDutyCycle) * m_pwmSliceTime * 1000.0);
+    qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff;
 }
 
 void QGpioPort::pwmSetDutyCycle(float dutycycle)
@@ -221,9 +199,7 @@ void QGpioPort::pwmSetFrequency(float freq)
 
 void QGpioPort::startPwm(float dutyCycle)
 {
-    if (dutyCycle > 0.0) {
-        pwmSetDutyCycle(dutyCycle);
-    }
+    pwmSetDutyCycle(dutyCycle);
     if (m_pwmRunner == nullptr) {
         pwmCalculateTimes();
         m_pwmRunner = QThread::create([&]{
@@ -280,6 +256,7 @@ bool QGpioPort::addEdgeDetect(QGpio::GpioEdge edge, int bouncetime)
 
 void QGpioPort::pwmThreadRun()
 {
+    qDebug() << Q_FUNC_INFO << "thread started for port" << m_port;
     while (!m_pwmRunner->isInterruptionRequested()) {
         if (m_pwmDutyCycle > 0.0) {
             setValue(QGpio::VALUE_HIGH);
@@ -391,6 +368,16 @@ bool QGpioPort::gpioSetEdge(QGpio::GpioEdge edge)
     close(fd);
     m_edge = edge;
     return true;
+}
+
+float QGpioPort::pwmFrequency() const
+{
+    return m_pwmFreq;
+}
+
+float QGpioPort::pwmDutyCycle() const
+{
+    return m_pwmDutyCycle;
 }
 
 quint64 QGpioPort::getLastCallTimestamp() const

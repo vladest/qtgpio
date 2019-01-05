@@ -13,12 +13,18 @@ public:
     friend class QGpio;
 
     void setPullupdn(QGpio::GpioPullUpDown pud);
+
     QGpio::GpioDirection getDirection();
+    void setDirection(QGpio::GpioDirection direction);
+
     void setValue(QGpio::GpioValue value);
     QGpio::GpioValue value();
 
     void pwmSetDutyCycle(float dutycycle);
+    float pwmDutyCycle() const;
+
     void pwmSetFrequency(float freq);
+    float pwmFrequency() const;
 
     void startPwm(float dutyCycle = 0.0);
     void stopPwm();
@@ -40,6 +46,8 @@ public:
 
     quint64 getLastCallTimestamp() const;
     void setLastCallTimestamp(const quint64 &lastCallTimestamp);
+
+
 
 protected:
 

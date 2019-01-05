@@ -7,8 +7,9 @@
 #include <QObject>
 #include <QPointer>
 #include <QMap>
-
 #include "rpicpuinfo.h"
+
+#include "rpi/bcm2835.h"
 
 class QGpioPort;
 
@@ -27,9 +28,14 @@ public:
     };
 
     enum GpioDirection {
-        DIRECTION_INPUT = 1, // is really 0 for control register!
-        DIRECTION_OUTPUT = 0, // is really 1 for control register!
-        DIRECTION_ALT0 = 4
+        DIRECTION_INPUT = BCM2835_GPIO_FSEL_INPT, // is really 0 for control register!
+        DIRECTION_OUTPUT = BCM2835_GPIO_FSEL_OUTP, // is really 1 for control register!
+        DIRECTION_ALT0 = BCM2835_GPIO_FSEL_ALT0,   /*!< Alternate function 0 0b100 */
+        DIRECTION_ALT1 = BCM2835_GPIO_FSEL_ALT1,   /*!< Alternate function 1 0b101 */
+        DIRECTION_ALT2 = BCM2835_GPIO_FSEL_ALT2,   /*!< Alternate function 2 0b110, */
+        DIRECTION_ALT3 = BCM2835_GPIO_FSEL_ALT3,   /*!< Alternate function 3 0b111 */
+        DIRECTION_ALT4 = BCM2835_GPIO_FSEL_ALT4,   /*!< Alternate function 4 0b011 */
+        DIRECTION_ALT5 = BCM2835_GPIO_FSEL_ALT5
     };
 
     enum GpioValue {
@@ -38,9 +44,9 @@ public:
     };
 
     enum GpioPullUpDown {
-        PUD_OFF  = 0,
-        PUD_DOWN = 1,
-        PUD_UP = 2
+        PUD_OFF  = BCM2835_GPIO_PUD_OFF,
+        PUD_DOWN = BCM2835_GPIO_PUD_DOWN,
+        PUD_UP = BCM2835_GPIO_PUD_UP
     };
 
     enum GpioEdge {
@@ -64,11 +70,6 @@ public:
     InitResult init() const;
 
     /**
-     * @brief deinit. Unmaps memory mapped GPIOs
-     */
-    void deinit();
-
-    /**
      * @brief allocateGpioPort. Allocates QGpioPort class for specific port.
      * If port already allocated, just returns already allocated address
      * @param port
@@ -77,19 +78,24 @@ public:
      * @return pointer to QGpioPort
      */
     QPointer<QGpioPort> allocateGpioPort(int port, GpioDirection direction, GpioPullUpDown pud = PUD_OFF);
-
+    void deallocateGpioPort(int port);
+    void deallocateGpioPort(QPointer<QGpioPort> port);
 
     /**
      * @brief getGpioMap
      * @return memory mapped address for GPIOs
      */
     uint32_t *getGpioMap();
-
 private:
     QGpio();
     virtual ~QGpio();
     QGpio(const QGpio&) = default;
     const QGpio& operator=(const QGpio&);
+
+    /**
+     * @brief deinit. Unmaps memory mapped GPIOs
+     */
+    void deinit();
 
     /**
      * @brief eventThreadRun: runner function for events thread
