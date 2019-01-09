@@ -20,15 +20,6 @@ public:
     void setValue(QGpio::GpioValue value);
     QGpio::GpioValue value();
 
-    void pwmSetDutyCycle(float dutycycle);
-    float pwmDutyCycle() const;
-
-    void pwmSetFrequency(float freq);
-    float pwmFrequency() const;
-
-    void startPwm(float dutyCycle = 0.0);
-    void stopPwm();
-
     /**
      * @brief addEdgeDetect: setup GPIO filesystem for epoll and add GPIO port to epoll thread
      * @return file descriptor for value
@@ -51,11 +42,6 @@ public:
 
 protected:
 
-    /**
-     * @brief pwmThreadRun: runner function for PWM thread
-     */
-    void pwmThreadRun();
-
     QGpioPort(int port, QGpio::GpioDirection direction, QGpio::GpioPullUpDown pud, QObject* parent = nullptr);
     virtual ~QGpioPort();
     void setGpioParent(QGpio* gpio);
@@ -68,7 +54,6 @@ private:
     void setHighEvent(bool enable);
     void setLowEvent(bool enable);
     void setup();
-    void pwmCalculateTimes();
 
     // events
     bool gpioExport();
@@ -82,21 +67,12 @@ private:
     QGpio::GpioPullUpDown m_pud = QGpio::PUD_OFF;
     QPointer<QGpio> m_gpio;
 
-    // PWM data for the port
-    float m_pwmFreq = 1000.0f;
-    float m_pwmDutyCycle = 0.0f;
-    float m_pwmBaseTime = 1.0f;
-    float m_pwmSliceTime = 0.01f;
-    qint64 m_pwmReqOn = 0;
-    qint64 m_pwmReqOff = 0;
-
     int m_valueFd = -1;
 
     QGpio::GpioEdge m_edge = QGpio::NO_EDGE;
     int m_bouncetime = -666;
     bool m_initialTrigger = true;
     quint64 m_lastCallTimestamp = 0;
-    QThread* m_pwmRunner = nullptr;
 };
 
 #endif // QGPIOPORT_H

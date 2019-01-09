@@ -1,8 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include "qgpio.h"
-#include "qgpioport.h"
+#include "pwmsoftware.h"
 
 class ServoControl : public QObject
 {
@@ -21,7 +20,6 @@ public:
 signals:
 
 private:
-    QGpio* m_gpio = nullptr;
-    QPointer<QGpioPort> servoPort;
+    PwmSoftware* m_pwm = nullptr;
 };
 

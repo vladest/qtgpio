@@ -10,42 +10,40 @@ inline unsigned long delayus(float angle) {
 
 ServoControl::ServoControl(int port, QObject *parent) : QObject(parent)
 {
-    m_gpio = QGpio::getInstance();
-    QGpio::InitResult res = m_gpio->init();
 
-    servoPort = m_gpio->allocateGpioPort(port, QGpio::DIRECTION_OUTPUT);
-    servoPort->pwmSetFrequency(50.0);
-    servoPort->startPwm(0);
+    m_pwm = new PwmSoftware(port);
+    m_pwm->pwmSetFrequency(50.0);
+    m_pwm->startPwm(0);
 }
 
 ServoControl::~ServoControl()
 {
-    servoPort->stopPwm();
-    m_gpio->deallocateGpioPort(servoPort);
+    m_pwm->stopPwm();
+    delete m_pwm;
 }
 
 void ServoControl::startCounterClockWise() {
-    servoPort->pwmSetDutyCycle(12);
+    m_pwm->pwmSetDutyCycle(12);
 }
 
 void ServoControl::startClockWise() {
-    servoPort->pwmSetDutyCycle(2);
+    m_pwm->pwmSetDutyCycle(2);
 }
 
 void ServoControl::counterClockWiseAngle(float angle) {
     startCounterClockWise();
     QThread::usleep(delayus(angle));
-    servoPort->pwmSetDutyCycle(0);
+    m_pwm->pwmSetDutyCycle(0);
 }
 
 void ServoControl::clockWiseAngle(float angle) {
     startClockWise();
     QThread::usleep(delayus(angle));
-    servoPort->pwmSetDutyCycle(0);
+    m_pwm->pwmSetDutyCycle(0);
 }
 
 void ServoControl::stop() {
-    servoPort->setValue(QGpio::VALUE_LOW);
-    servoPort->pwmSetDutyCycle(0.0);
+    m_pwm->pwmPort()->setValue(QGpio::VALUE_LOW);
+    m_pwm->pwmSetDutyCycle(0.0);
 }
 

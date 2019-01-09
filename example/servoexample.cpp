@@ -14,10 +14,7 @@ ServoExample::ServoExample(QObject *parent) : QObject(parent)
     connect (m_consoleReader, SIGNAL (KeyPressed(char)), this, SLOT(OnConsoleKeyPressed(char)));
     m_consoleReader->start();
 
-    m_gpio = QGpio::getInstance();
-    QGpio::InitResult res = m_gpio->init();
-    qDebug() << "Result" << (int)res << m_gpio->getGpioMap();
-    buzzer = m_gpio->allocateGpioPort(18, QGpio::DIRECTION_OUTPUT);
+    buzzer = new PwmSoftware(18);
     buzzer->pwmSetFrequency(450);
     buzzer->startPwm(0);
     servoPortLeftRight = new ServoControl(17);
@@ -32,6 +29,7 @@ ServoExample::~ServoExample()
     delete m_consoleReader;
     delete servoPortUpDown;
     delete servoPortLeftRight;
+    delete buzzer;
 }
 
 void ServoExample::OnConsoleKeyPressed(char ch)

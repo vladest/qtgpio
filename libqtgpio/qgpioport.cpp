@@ -29,15 +29,13 @@ void short_wait(void)
 }
 
 QGpioPort::QGpioPort(int port, QGpio::GpioDirection direction, QGpio::GpioPullUpDown pud, QObject *parent) :
-    m_port(port), m_direction(direction), m_pud(pud),
-    QObject(parent)
+    QObject(parent), m_port(port), m_direction(direction), m_pud(pud)
 {
     setup();
 }
 
 QGpioPort::~QGpioPort()
 {
-    stopPwm(); //stop thread if running
     //set port to input/pud off
     m_pud = QGpio::PUD_OFF;
     m_direction = QGpio::DIRECTION_INPUT;
@@ -163,61 +161,7 @@ QGpio::GpioValue QGpioPort::value()
     return (QGpio::GpioValue)bcm2835_gpio_lev(m_port);
 }
 
-//PWM part
 
-void QGpioPort::pwmCalculateTimes()
-{
-    m_pwmReqOn = (long long)(m_pwmDutyCycle * m_pwmSliceTime * 1000.0);
-    m_pwmReqOff = (long long)((100.0 - m_pwmDutyCycle) * m_pwmSliceTime * 1000.0);
-    qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff;
-}
-
-void QGpioPort::pwmSetDutyCycle(float dutycycle)
-{
-    if (dutycycle < 0.0 || dutycycle > 100.0) {
-        qWarning() << "Invalid duty cycle provided:" << dutycycle << "Valid values are from 0.0 to 100.0";
-        return;
-    }
-    m_pwmDutyCycle = dutycycle;
-    pwmCalculateTimes();
-}
-
-void QGpioPort::pwmSetFrequency(float freq)
-{
-
-    if (freq <= 0.0) // to avoid divide by zero
-    {
-        qWarning() << "Invalid frequency provided:" << freq << "Valid value is greater than 0.0";
-        return;
-    }
-
-    m_pwmFreq = freq;
-    m_pwmBaseTime = 1000.0 / freq;    // calculated in ms
-    m_pwmSliceTime = m_pwmBaseTime / 100.0;
-    pwmCalculateTimes();
-}
-
-void QGpioPort::startPwm(float dutyCycle)
-{
-    pwmSetDutyCycle(dutyCycle);
-    if (m_pwmRunner == nullptr) {
-        pwmCalculateTimes();
-        m_pwmRunner = QThread::create([&]{
-            pwmThreadRun();
-        });
-        m_pwmRunner->start(QThread::TimeCriticalPriority);
-    }
-}
-
-void QGpioPort::stopPwm()
-{
-    if (m_pwmRunner != nullptr) {
-        m_pwmRunner->requestInterruption();
-        m_pwmRunner->wait(m_pwmReqOn + m_pwmReqOff + 100);
-        delete m_pwmRunner;
-        m_pwmRunner = nullptr;
-    }
-}
 
 void QGpioPort::removeEdgeDetect()
 {
@@ -252,26 +196,6 @@ bool QGpioPort::addEdgeDetect(QGpio::GpioEdge edge, int bouncetime)
         m_gpio->addToInputEventsThread(this);
     }
     return true;
-}
-
-void QGpioPort::pwmThreadRun()
-{
-    qDebug() << Q_FUNC_INFO << "thread started for port" << m_port;
-    while (!m_pwmRunner->isInterruptionRequested()) {
-        if (m_pwmDutyCycle > 0.0) {
-            setValue(QGpio::VALUE_HIGH);
-            QThread::usleep(m_pwmReqOn);
-        }
-
-        if (m_pwmDutyCycle < 100.0) {
-            setValue(QGpio::VALUE_LOW);
-            QThread::usleep(m_pwmReqOff);
-        }
-    }
-
-    // clean up
-    setValue(QGpio::VALUE_LOW);
-    qDebug() << Q_FUNC_INFO << "thread stopped for port" << m_port;
 }
 
 #define x_write(fd, buf, len) do {                                  \
@@ -368,16 +292,6 @@ bool QGpioPort::gpioSetEdge(QGpio::GpioEdge edge)
     close(fd);
     m_edge = edge;
     return true;
-}
-
-float QGpioPort::pwmFrequency() const
-{
-    return m_pwmFreq;
-}
-
-float QGpioPort::pwmDutyCycle() const
-{
-    return m_pwmDutyCycle;
 }
 
 quint64 QGpioPort::getLastCallTimestamp() const
