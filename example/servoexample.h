@@ -3,7 +3,7 @@
 #include <QObject>
 #include "pwmsoftware.h"
 #include "consolereader.h"
-#include "servocontrol.h"
+#include "servosoftware.h"
 #include "servocontrol9685.h"
 
 class ServoExample : public QObject

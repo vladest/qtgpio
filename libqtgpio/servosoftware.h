@@ -2,14 +2,14 @@
 
 #include <QObject>
 #include "servobase.h"
-#include "pwmpca9685.h"
+#include "pwmsoftware.h"
 
-class ServoControl9685 : public ServoBase
+class ServoSoftware : public ServoBase
 {
     Q_OBJECT
 public:
-    explicit ServoControl9685(int channel, QObject *parent = nullptr);
-    virtual ~ServoControl9685();
+    explicit ServoSoftware(int port, QObject *parent = nullptr);
+    virtual ~ServoSoftware();
 
     void stopRotating() override;
     void startRotating(float torque) override;
@@ -18,7 +18,11 @@ public:
     void recalcDuty() override;
 
 private:
-    PwmPCA9685* m_pwm = nullptr;
-    uint8_t m_channel = 0xff;
+    PwmSoftware* m_pwm = nullptr;
+
+
+
+    // ServoBase interface
+
 };
 

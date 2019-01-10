@@ -14,7 +14,6 @@ void PwmPCA9685::pwmSetDutyCycle(int channel, uint16_t dutycycle)
     Write((uint8_t)channel, dutycycle);
 }
 
-// unused
 uint16_t PwmPCA9685::pwmDutyCycle(int channel)
 {
     uint16_t nOn, nOff;
@@ -22,7 +21,6 @@ uint16_t PwmPCA9685::pwmDutyCycle(int channel)
     return nOff;
 }
 
-// PCA9685_OSC_FREQ / 4096 / prescale_reg
 void PwmPCA9685::pwmSetFrequency(float freq)
 {
     SetFrequency((uint16_t)freq);
@@ -30,7 +28,7 @@ void PwmPCA9685::pwmSetFrequency(float freq)
 
 float PwmPCA9685::pwmFrequency()
 {
-    return (uint16_t)GetFrequency();
+    return (float)GetFrequency();
 }
 
 void PwmPCA9685::startPwm(int channel, uint16_t dutyCycle)

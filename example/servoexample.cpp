@@ -17,8 +17,13 @@ ServoExample::ServoExample(QObject *parent) : QObject(parent)
     buzzer = new PwmSoftware(18);
     buzzer->pwmSetFrequency(450);
     buzzer->startPwm(0);
-    servoPortLeftRight = new ServoControl9685(8);
+    servoPortLeftRight = new ServoControl9685(10);
     servoPortUpDown = new ServoControl9685(9);
+
+    //MG995
+    servoPortLeftRight->setServoPulses(500, 2300);
+    //MG90S
+    servoPortUpDown->setServoPulses(550, 2250);
 }
 
 ServoExample::~ServoExample()
@@ -58,27 +63,31 @@ void ServoExample::OnConsoleKeyPressed(char ch)
             }  else if (ch == 0x41) { //UP
                 qDebug() << "UP" << esc_seq;
                 if (esc_seq)
-                    servoPortUpDown->startCounterClockWise();
+                    servoPortUpDown->startRotating(-1.0);
             } else if (ch == 0x42) { //DOWN
                 qDebug() << "DOWN" << esc_seq;
                 if (esc_seq)
-                    servoPortUpDown->startClockWise();
+                    servoPortUpDown->startRotating(1.0);
             } else if (ch == 0x44) { //LEFT
                 qDebug() << "LEFT" << esc_seq;
                 if (esc_seq)
-                    servoPortLeftRight->startCounterClockWise();
+                    servoPortLeftRight->startRotating(-1.0);
             } else if (ch == 0x43) { //RIGHT
                 qDebug() << "RIGHT" << esc_seq;
                 if (esc_seq)
-                    servoPortLeftRight->startClockWise();
+                    servoPortLeftRight->startRotating(1.0);
             } else if (ch == 'a') { //LEFT
-                servoPortLeftRight->counterClockWiseAngle(12);
+                servoPortLeftRight->setAngle(0);
             } else if (ch == 'd') { //RIGHT
-                servoPortLeftRight->clockWiseAngle(12);
-            } else if (ch == 0x20) { //SPACE
+                servoPortLeftRight->setAngle(180);
+            } else if (ch == 'w') { //LEFT
+                servoPortUpDown->setAngle(0);
+            } else if (ch == 's') { //RIGHT
+                servoPortUpDown->setAngle(180);
+            }else if (ch == 0x20) { //SPACE
                 qDebug() << "SPACE" << esc_seq;
-                servoPortLeftRight->stop();
-                servoPortUpDown->stop();
+                servoPortLeftRight->stopRotating();
+                servoPortUpDown->stopRotating();
             }
 
             esc = esc_seq = false;
