@@ -10,7 +10,8 @@ SOURCES += \
     $$PWD/rpi/bcm2835.c \
     $$PWD/modules/pca9685/pca9685.cpp \
     $$PWD/pwmsoftware.cpp \
-    $$PWD/pwmpca9685.cpp
+    $$PWD/pwmpca9685.cpp \
+    $$PWD/servocontrol9685.cpp
 
 HEADERS += \
     $$PWD/qgpio.h \
@@ -21,4 +22,5 @@ HEADERS += \
     $$PWD/modules/pca9685/pca9685.h \
     $$PWD/pwmabstract.h \
     $$PWD/pwmsoftware.h \
-    $$PWD/pwmpca9685.h
+    $$PWD/pwmpca9685.h \
+    $$PWD/servocontrol9685.h

@@ -64,8 +64,8 @@ void QGpio::deallocateGpioPort(int port)
 void QGpio::deallocateGpioPort(QPointer<QGpioPort> port)
 {
     if (!port.isNull()) {
-        delete port;
         m_PortsAllocated.remove(port->getPort());
+        delete port;
     }
 }
 
@@ -77,11 +77,6 @@ QGpio::QGpio() : QObject(nullptr)
 QGpio::~QGpio()
 {
     deinit();
-}
-
-const QGpio &QGpio::operator=(const QGpio &)
-{
-    return *this;
 }
 
 void QGpio::removeFromInputEventsThread(QGpioPort *gpioPort)

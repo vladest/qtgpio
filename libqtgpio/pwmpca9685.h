@@ -13,11 +13,11 @@ public:
 
     // PwmAbstract interface
 public:
-    void pwmSetDutyCycle(int channel, float dutycycle) override;
-    float pwmDutyCycle(int channel) override;
+    void pwmSetDutyCycle(int channel, uint16_t dutycycle) override;
+    uint16_t pwmDutyCycle(int channel) override;
     void pwmSetFrequency(float freq) override;
     float pwmFrequency() override;
-    void startPwm(int channel, float dutyCycle) override;
+    void startPwm(int channel, uint16_t dutyCycle) override;
     void stopPwm(int channel) override;
 
 };

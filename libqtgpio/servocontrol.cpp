@@ -1,7 +1,6 @@
 #include "servocontrol.h"
 #include <QDebug>
 #include <QCoreApplication>
-#include <QElapsedTimer>
 
 inline unsigned long delayus(float angle) {
     //SG90 servo speed 60 grad by 0.1sec
@@ -10,7 +9,6 @@ inline unsigned long delayus(float angle) {
 
 ServoControl::ServoControl(int port, QObject *parent) : QObject(parent)
 {
-
     m_pwm = new PwmSoftware(port);
     m_pwm->pwmSetFrequency(50.0);
     m_pwm->startPwm(0);
@@ -43,7 +41,6 @@ void ServoControl::clockWiseAngle(float angle) {
 }
 
 void ServoControl::stop() {
-    m_pwm->pwmPort()->setValue(QGpio::VALUE_LOW);
     m_pwm->pwmSetDutyCycle(-1, 0.0);
 }
 

@@ -17,19 +17,20 @@ ServoExample::ServoExample(QObject *parent) : QObject(parent)
     buzzer = new PwmSoftware(18);
     buzzer->pwmSetFrequency(450);
     buzzer->startPwm(0);
-    servoPortLeftRight = new ServoControl(17);
-    servoPortUpDown = new ServoControl(27);
+    servoPortLeftRight = new ServoControl9685(8);
+    servoPortUpDown = new ServoControl9685(9);
 }
 
 ServoExample::~ServoExample()
 {
     qDebug() << "Shutdown servo";
-    m_consoleReader->terminate();
-    m_consoleReader->wait(500);
+    m_consoleReader->disconnect();
+    m_consoleReader->wait(1000);
     delete m_consoleReader;
     delete servoPortUpDown;
     delete servoPortLeftRight;
     delete buzzer;
+    qDebug() << "Shutdown servo finished";
 }
 
 void ServoExample::OnConsoleKeyPressed(char ch)
@@ -46,10 +47,8 @@ void ServoExample::OnConsoleKeyPressed(char ch)
             if (esc)
                 esc_seq = true;
         } else {
-            if (ch == 0xA) {
+            if (ch == 0xA || ch == 'q') {
                 m_consoleReader->requestInterruption();
-                m_consoleReader->terminate();
-                delete m_consoleReader;
                 qApp->exit();
             } else if (ch == 'b') { //UP
                 if (buzzer->pwmDutyCycle(-1) < 1.0)
@@ -58,12 +57,12 @@ void ServoExample::OnConsoleKeyPressed(char ch)
                     buzzer->pwmSetDutyCycle(-1, 0.0);
             }  else if (ch == 0x41) { //UP
                 qDebug() << "UP" << esc_seq;
-//                if (esc_seq)
-//                    upDown(true, 90);
+                if (esc_seq)
+                    servoPortUpDown->startCounterClockWise();
             } else if (ch == 0x42) { //DOWN
                 qDebug() << "DOWN" << esc_seq;
-//                if (esc_seq)
-//                    upDown(false, 90);
+                if (esc_seq)
+                    servoPortUpDown->startClockWise();
             } else if (ch == 0x44) { //LEFT
                 qDebug() << "LEFT" << esc_seq;
                 if (esc_seq)
@@ -79,6 +78,7 @@ void ServoExample::OnConsoleKeyPressed(char ch)
             } else if (ch == 0x20) { //SPACE
                 qDebug() << "SPACE" << esc_seq;
                 servoPortLeftRight->stop();
+                servoPortUpDown->stop();
             }
 
             esc = esc_seq = false;

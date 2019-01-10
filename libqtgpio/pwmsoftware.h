@@ -12,13 +12,13 @@ public:
     PwmSoftware(int port);
     virtual ~PwmSoftware();
 
-    void pwmSetDutyCycle(int channel, float dutycycle) override;
-    float pwmDutyCycle(int channel) override;
+    void pwmSetDutyCycle(int channel, uint16_t dutycycle) override;
+    uint16_t pwmDutyCycle(int channel) override;
 
     void pwmSetFrequency(float freq) override;
     float pwmFrequency() override;
 
-    void startPwm(int channel, float dutyCycle = 0.0) override;
+    void startPwm(int channel, uint16_t dutyCycle = 0) override;
     void stopPwm(int channel) override;
     QPointer<QGpioPort> pwmPort() const;
 
@@ -33,6 +33,8 @@ private:
     // PWM data for the port
     qint64 m_pwmReqOn = 0;
     qint64 m_pwmReqOff = 0;
+    float m_pwmBaseTime = 1.0f;
+    float m_pwmSliceTime = 0.01f;
 
     QGpio* m_gpio;
     QThread* m_pwmRunner = nullptr;

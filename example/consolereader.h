@@ -11,8 +11,10 @@ signals:
     void KeyPressed(char ch);
 public:
    ConsoleReader();
-   ~ConsoleReader();
-   void run();
+   virtual ~ConsoleReader();
+
+protected:
+   void run() override;
 
 private:
    struct termios oldSettings;

@@ -1,4 +1,5 @@
 #include "consolereader.h"
+#include <QDebug>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -34,10 +35,25 @@ ConsoleReader::~ConsoleReader()
     resetTermios();
 }
 
+bool inputAvailable()
+{
+    struct timeval tv;
+    fd_set fds;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+    return (FD_ISSET(0, &fds));
+}
+
 void ConsoleReader::run()
 {
     while (!isInterruptionRequested()) {
-        char key = getch();
-        emit KeyPressed(key);
+        if (inputAvailable()) {
+            char key = getch();
+            emit KeyPressed(key);
+        }
+        msleep(32);
     }
 }

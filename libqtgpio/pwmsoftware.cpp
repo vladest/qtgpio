@@ -30,9 +30,10 @@ QPointer<QGpioPort> PwmSoftware::pwmPort() const
     return m_pwmPort;
 }
 
-void PwmSoftware::pwmSetDutyCycle(int channel, float dutycycle)
+void PwmSoftware::pwmSetDutyCycle(int channel, uint16_t dutycycle)
 {
-    if (dutycycle < 0.0 || dutycycle > 100.0) {
+    Q_UNUSED(channel)
+    if ((float)dutycycle < 0 || dutycycle > 100) {
         qWarning() << "Invalid duty cycle provided:" << dutycycle << "Valid values are from 0.0 to 100.0";
         return;
     }
@@ -58,12 +59,13 @@ float PwmSoftware::pwmFrequency()
     return m_pwmFreq;
 }
 
-float PwmSoftware::pwmDutyCycle(int channel)
+uint16_t PwmSoftware::pwmDutyCycle(int channel)
 {
+    Q_UNUSED(channel)
     return m_pwmDutyCycle;
 }
 
-void PwmSoftware::startPwm(int channel, float dutyCycle)
+void PwmSoftware::startPwm(int channel, uint16_t dutyCycle)
 {
     pwmSetDutyCycle(channel, dutyCycle);
     if (m_pwmRunner == nullptr && m_pwmPort.isNull() == false) {
@@ -77,6 +79,7 @@ void PwmSoftware::startPwm(int channel, float dutyCycle)
 
 void PwmSoftware::stopPwm(int channel)
 {
+    Q_UNUSED(channel)
     if (m_pwmRunner != nullptr) {
         m_pwmRunner->requestInterruption();
         m_pwmRunner->wait(m_pwmReqOn + m_pwmReqOff + 100);

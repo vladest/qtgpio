@@ -4,6 +4,7 @@
 #include "pwmsoftware.h"
 #include "consolereader.h"
 #include "servocontrol.h"
+#include "servocontrol9685.h"
 
 class ServoExample : public QObject
 {
@@ -12,21 +13,12 @@ public:
     explicit ServoExample(QObject *parent = nullptr);
     virtual ~ServoExample();
 
-    void stop();
-
-    void startCounterClockWise();
-    void startClockWise();
-    void counterClockWiseAngle(float angle);
-    void clockWiseAngle(float angle);
-
-signals:
-
 public slots:
     void OnConsoleKeyPressed(char ch);
 private:
     ConsoleReader *m_consoleReader = nullptr;
-    ServoControl* servoPortLeftRight = nullptr;
-    ServoControl* servoPortUpDown = nullptr;
+    ServoControl9685* servoPortLeftRight = nullptr;
+    ServoControl9685* servoPortUpDown = nullptr;
     PwmSoftware* buzzer;
 };
 

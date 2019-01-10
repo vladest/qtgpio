@@ -89,8 +89,7 @@ public:
 private:
     QGpio();
     virtual ~QGpio();
-    QGpio(const QGpio&) = default;
-    const QGpio& operator=(const QGpio&);
+    Q_DISABLE_COPY(QGpio);
 
     /**
      * @brief deinit. Unmaps memory mapped GPIOs
