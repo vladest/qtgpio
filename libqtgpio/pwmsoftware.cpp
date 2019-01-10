@@ -15,6 +15,7 @@ PwmSoftware::PwmSoftware(int port)
 
 PwmSoftware::~PwmSoftware()
 {
+    stopPwm(-1);
     m_gpio->deallocateGpioPort(m_pwmPort);
 }
 
