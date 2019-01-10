@@ -8,6 +8,8 @@ PwmSoftware::PwmSoftware(int port)
     m_gpio = QGpio::getInstance();
     if (m_gpio->init() == QGpio::INIT_OK) {
         m_pwmPort = m_gpio->allocateGpioPort(port, QGpio::DIRECTION_OUTPUT);
+    } else {
+        qWarning() << "Error initing GPIO";
     }
 }
 
@@ -28,7 +30,7 @@ QPointer<QGpioPort> PwmSoftware::pwmPort() const
     return m_pwmPort;
 }
 
-void PwmSoftware::pwmSetDutyCycle(float dutycycle)
+void PwmSoftware::pwmSetDutyCycle(int channel, float dutycycle)
 {
     if (dutycycle < 0.0 || dutycycle > 100.0) {
         qWarning() << "Invalid duty cycle provided:" << dutycycle << "Valid values are from 0.0 to 100.0";
@@ -51,19 +53,19 @@ void PwmSoftware::pwmSetFrequency(float freq)
     pwmCalculateTimes();
 }
 
-float PwmSoftware::pwmFrequency() const
+float PwmSoftware::pwmFrequency()
 {
     return m_pwmFreq;
 }
 
-float PwmSoftware::pwmDutyCycle() const
+float PwmSoftware::pwmDutyCycle(int channel)
 {
     return m_pwmDutyCycle;
 }
 
-void PwmSoftware::startPwm(float dutyCycle)
+void PwmSoftware::startPwm(int channel, float dutyCycle)
 {
-    pwmSetDutyCycle(dutyCycle);
+    pwmSetDutyCycle(channel, dutyCycle);
     if (m_pwmRunner == nullptr && m_pwmPort.isNull() == false) {
         pwmCalculateTimes();
         m_pwmRunner = QThread::create([&]{
@@ -73,7 +75,7 @@ void PwmSoftware::startPwm(float dutyCycle)
     }
 }
 
-void PwmSoftware::stopPwm()
+void PwmSoftware::stopPwm(int channel)
 {
     if (m_pwmRunner != nullptr) {
         m_pwmRunner->requestInterruption();
@@ -88,11 +90,13 @@ void PwmSoftware::pwmThreadRun()
     qDebug() << Q_FUNC_INFO << "thread started for port" << m_pwmPort->getPort();
     while (!m_pwmRunner->isInterruptionRequested()) {
         if (m_pwmDutyCycle > 0.0) {
+            //qDebug() << "set high";
             m_pwmPort->setValue(QGpio::VALUE_HIGH);
             QThread::usleep(m_pwmReqOn);
         }
 
         if (m_pwmDutyCycle < 100.0) {
+            //qDebug() << "set low";
             m_pwmPort->setValue(QGpio::VALUE_LOW);
             QThread::usleep(m_pwmReqOff);
         }

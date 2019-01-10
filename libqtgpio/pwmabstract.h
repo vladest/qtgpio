@@ -5,14 +5,14 @@
 class PwmAbstract
 {
 public:
-    virtual void pwmSetDutyCycle(float dutycycle) = 0;
-    virtual float pwmDutyCycle() const = 0;
+    virtual void pwmSetDutyCycle(int channel, float dutycycle) = 0;
+    virtual float pwmDutyCycle(int channel) = 0;
 
     virtual void pwmSetFrequency(float freq) = 0;
-    virtual float pwmFrequency() const = 0;
+    virtual float pwmFrequency() = 0;
 
-    virtual void startPwm(float dutyCycle = 0.0) = 0;
-    virtual void stopPwm()  = 0;
+    virtual void startPwm(int channel, float dutyCycle = 0.0) = 0;
+    virtual void stopPwm(int channel)  = 0;
 
 protected:
     float m_pwmFreq = 1000.0f;

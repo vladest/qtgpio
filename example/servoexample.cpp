@@ -52,10 +52,10 @@ void ServoExample::OnConsoleKeyPressed(char ch)
                 delete m_consoleReader;
                 qApp->exit();
             } else if (ch == 'b') { //UP
-                if (buzzer->pwmDutyCycle() < 1.0)
-                    buzzer->pwmSetDutyCycle(1.0);
+                if (buzzer->pwmDutyCycle(-1) < 1.0)
+                    buzzer->pwmSetDutyCycle(-1, 1.0);
                 else
-                    buzzer->pwmSetDutyCycle(0.0);
+                    buzzer->pwmSetDutyCycle(-1, 0.0);
             }  else if (ch == 0x41) { //UP
                 qDebug() << "UP" << esc_seq;
 //                if (esc_seq)

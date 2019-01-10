@@ -18,32 +18,32 @@ ServoControl::ServoControl(int port, QObject *parent) : QObject(parent)
 
 ServoControl::~ServoControl()
 {
-    m_pwm->stopPwm();
+    m_pwm->stopPwm(-1);
     delete m_pwm;
 }
 
 void ServoControl::startCounterClockWise() {
-    m_pwm->pwmSetDutyCycle(12);
+    m_pwm->pwmSetDutyCycle(-1, 12);
 }
 
 void ServoControl::startClockWise() {
-    m_pwm->pwmSetDutyCycle(2);
+    m_pwm->pwmSetDutyCycle(-1, 2);
 }
 
 void ServoControl::counterClockWiseAngle(float angle) {
     startCounterClockWise();
     QThread::usleep(delayus(angle));
-    m_pwm->pwmSetDutyCycle(0);
+    m_pwm->pwmSetDutyCycle(-1, 0);
 }
 
 void ServoControl::clockWiseAngle(float angle) {
     startClockWise();
     QThread::usleep(delayus(angle));
-    m_pwm->pwmSetDutyCycle(0);
+    m_pwm->pwmSetDutyCycle(-1, 0);
 }
 
 void ServoControl::stop() {
     m_pwm->pwmPort()->setValue(QGpio::VALUE_LOW);
-    m_pwm->pwmSetDutyCycle(0.0);
+    m_pwm->pwmSetDutyCycle(-1, 0.0);
 }
 

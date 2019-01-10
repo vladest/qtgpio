@@ -12,14 +12,14 @@ public:
     PwmSoftware(int port);
     virtual ~PwmSoftware();
 
-    void pwmSetDutyCycle(float dutycycle);
-    float pwmDutyCycle() const;
+    void pwmSetDutyCycle(int channel, float dutycycle) override;
+    float pwmDutyCycle(int channel) override;
 
-    void pwmSetFrequency(float freq);
-    float pwmFrequency() const;
+    void pwmSetFrequency(float freq) override;
+    float pwmFrequency() override;
 
-    void startPwm(float dutyCycle = 0.0);
-    void stopPwm();
+    void startPwm(int channel, float dutyCycle = 0.0) override;
+    void stopPwm(int channel) override;
     QPointer<QGpioPort> pwmPort() const;
 
 private:
