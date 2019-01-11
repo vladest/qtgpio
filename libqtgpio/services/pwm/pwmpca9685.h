@@ -10,6 +10,7 @@ class PwmPCA9685 : public PwmBase, public PCA9685
 {
 public:
     PwmPCA9685(uint8_t port = PCA9685_I2C_ADDRESS_DEFAULT);
+    virtual ~PwmPCA9685() = default;
 
     // PwmAbstract interface
 public:

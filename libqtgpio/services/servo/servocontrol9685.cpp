@@ -47,6 +47,7 @@ void ServoControl9685::startRotating(float torque)
 
 void ServoControl9685::rotateAngle(float angle)
 {
+    Q_UNUSED(angle)
     //TODO: implement
 }
 

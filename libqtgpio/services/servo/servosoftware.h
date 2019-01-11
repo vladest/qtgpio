@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include "servobase.h"
-#include "pwmsoftware.h"
+#include "pwm/pwmsoftware.h"
 
 class ServoSoftware : public ServoBase
 {

@@ -1,10 +1,9 @@
 #pragma once
 
 #include <QObject>
-#include "pwmsoftware.h"
+#include "pwm/pwmsoftware.h"
 #include "consolereader.h"
-#include "servosoftware.h"
-#include "servocontrol9685.h"
+#include "servo/servobase.h"
 
 class ServoExample : public QObject
 {

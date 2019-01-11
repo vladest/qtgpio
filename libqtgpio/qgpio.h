@@ -7,8 +7,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QMap>
-#include "rpicpuinfo.h"
-
+#include "rpi/rpicpuinfo.h"
 #include "rpi/bcm2835.h"
 
 class QGpioPort;

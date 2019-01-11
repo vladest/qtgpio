@@ -3,6 +3,9 @@
 #include <QCoreApplication>
 #include <QElapsedTimer>
 
+#include "servo/servosoftware.h"
+#include "servo/servocontrol9685.h"
+
 inline unsigned long delayus(float angle) {
     //SG90 servo speed 60 grad by 0.1sec
     return (unsigned long)((100000.0/60.0)*angle);

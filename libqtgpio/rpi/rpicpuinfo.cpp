@@ -10,10 +10,11 @@ RpiCpuInfo::RpiCpuInfo()
 
 QString RpiCpuInfo::boardString()
 {
-    QString s_type = QStringLiteral("Unknown");
-    QString s_manufacturer = QStringLiteral("Unknown");
-    QString s_soc = QStringLiteral("Unknown");
+    QString s_type;
+    QString s_manufacturer;
+    QString s_soc;
     switch (soc) {
+    case RpiCpuInfo::SOC_UNDEFINED: s_soc = QStringLiteral("Unknown"); break;
     case SOC_BCM2708: s_soc = QStringLiteral("BCM2708"); break;
     case SOC_BCM2709: s_soc = QStringLiteral("BCM2709"); break;
     case SOC_BCM2835: s_soc = QStringLiteral("BCM2835"); break;
@@ -21,6 +22,7 @@ QString RpiCpuInfo::boardString()
     case SOC_BCM2837: s_soc = QStringLiteral("BCM2837"); break;
     }
     switch (type) {
+    case RpiCpuInfo::RPI_UNKNOWN: s_type = QStringLiteral("Unknown"); break;
     case RPI_CM: s_type = QStringLiteral("Computer Module"); break;
     case RPI_ZERO: s_type = QStringLiteral("Zero"); break;
     case RPI_ALPHA: s_type = QStringLiteral("Alpha"); break;
@@ -32,6 +34,7 @@ QString RpiCpuInfo::boardString()
     case RPI_PI3_MODEL_B: s_type = QStringLiteral("Pi 3 Model B"); break;
     }
     switch (manufacturer) {
+    case RpiCpuInfo::MANUFACTURER_UNKNOWN: s_manufacturer = QStringLiteral("Unknown"); break;
     case MANUFACTURER_SONY: s_manufacturer = QStringLiteral("Sony"); break;
     case MANUFACTURER_QISDA: s_manufacturer = QStringLiteral("Qisda"); break;
     case MANUFACTURER_EGOMAN: s_manufacturer = QStringLiteral("Egoman"); break;

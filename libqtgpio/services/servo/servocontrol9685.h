@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include "servobase.h"
-#include "pwmpca9685.h"
+#include "pwm/pwmpca9685.h"
 
 class ServoControl9685 : public ServoBase
 {

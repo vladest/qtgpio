@@ -6,6 +6,7 @@
 /* Initialize new terminal i/o settings */
 void ConsoleReader::initTermios(int echo)
 {
+    Q_UNUSED(echo)
     tcgetattr(0, &oldSettings); /* grab old terminal i/o settings */
     newSettings = oldSettings; /* make new settings same as old settings */
     //newSettings.c_lflag |= (ECHO | ECHOE | ICANON);

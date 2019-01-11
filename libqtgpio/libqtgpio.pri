@@ -1,28 +1,28 @@
-CONFIG += c++17
+CONFIG += c++14
 
-INCLUDEPATH += $$PWD/modules
+INCLUDEPATH += $$PWD/rpi $$PWD/hats $$PWD/services/
 
 SOURCES += \
     $$PWD/qgpio.cpp \
     $$PWD/qgpioport.cpp \
-    $$PWD/rpicpuinfo.cpp \
+    $$PWD/rpi/rpicpuinfo.cpp \
     $$PWD/rpi/bcm2835.c \
-    $$PWD/modules/pca9685/pca9685.cpp \
-    $$PWD/pwmsoftware.cpp \
-    $$PWD/pwmpca9685.cpp \
-    $$PWD/servocontrol9685.cpp \
-    $$PWD/servobase.cpp \
-    $$PWD/servosoftware.cpp
+    $$PWD/hats/pca9685/pca9685.cpp \
+    $$PWD/services/pwm/pwmsoftware.cpp \
+    $$PWD/services/pwm/pwmpca9685.cpp \
+    $$PWD/services/servo/servocontrol9685.cpp \
+    $$PWD/services/servo/servobase.cpp \
+    $$PWD/services/servo/servosoftware.cpp
 
 HEADERS += \
     $$PWD/qgpio.h \
     $$PWD/qgpioport.h \
-    $$PWD/rpicpuinfo.h \
+    $$PWD/rpi/rpicpuinfo.h \
     $$PWD/rpi/bcm2835.h \
-    $$PWD/modules/pca9685/pca9685.h \
-    $$PWD/pwmsoftware.h \
-    $$PWD/pwmpca9685.h \
-    $$PWD/servocontrol9685.h \
-    $$PWD/servobase.h \
-    $$PWD/servosoftware.h \
-    $$PWD/pwmbase.h
+    $$PWD/hats/pca9685/pca9685.h \
+    $$PWD/services/pwm/pwmsoftware.h \
+    $$PWD/services/pwm/pwmpca9685.h \
+    $$PWD/services/servo/servocontrol9685.h \
+    $$PWD/services/servo/servobase.h \
+    $$PWD/services/servo/servosoftware.h \
+    $$PWD/services/pwm/pwmbase.h
