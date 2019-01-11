@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "pwmabstract.h"
+#include "pwmbase.h"
 #include "pca9685/pca9685.h"
 
 class PwmPCA9685 : public PwmBase, public PCA9685
@@ -13,11 +13,11 @@ public:
 
     // PwmAbstract interface
 public:
-    void pwmSetDutyCycle(int channel, uint16_t dutycycle) override;
-    uint16_t pwmDutyCycle(int channel) override;
+    void pwmSetDutyCycle(int channel, const QVariant& dutycycle) override;
+    QVariant pwmDutyCycle(int channel) override;
     void pwmSetFrequency(float freq) override;
     float pwmFrequency() override;
-    void startPwm(int channel, uint16_t dutyCycle) override;
+    void startPwm(int channel, const QVariant& dutyCycle) override;
     void stopPwm(int channel) override;
 
 };

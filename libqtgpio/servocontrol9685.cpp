@@ -2,11 +2,6 @@
 #include <QDebug>
 #include <QCoreApplication>
 
-//#define SERVO_MIN_PULSE	750
-//#define SERVO_MAX_PULSE	2250
-
-#define SERVO_MIN_PULSE	400
-#define SERVO_MAX_PULSE	2400
 
 //def set_pulse_width_range(self, min_pulse=750, max_pulse=2250):
 //        self._min_duty = int((min_pulse * self._pwm_out.frequency) / 1000000 * 0xffff)

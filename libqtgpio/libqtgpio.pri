@@ -20,9 +20,9 @@ HEADERS += \
     $$PWD/rpicpuinfo.h \
     $$PWD/rpi/bcm2835.h \
     $$PWD/modules/pca9685/pca9685.h \
-    $$PWD/pwmabstract.h \
     $$PWD/pwmsoftware.h \
     $$PWD/pwmpca9685.h \
     $$PWD/servocontrol9685.h \
     $$PWD/servobase.h \
-    $$PWD/servosoftware.h
+    $$PWD/servosoftware.h \
+    $$PWD/pwmbase.h

@@ -9,12 +9,12 @@ PwmPCA9685::PwmPCA9685(uint8_t port) :
     SetFrequency(50);
 }
 
-void PwmPCA9685::pwmSetDutyCycle(int channel, uint16_t dutycycle)
+void PwmPCA9685::pwmSetDutyCycle(int channel, const QVariant &dutycycle)
 {
-    Write((uint8_t)channel, dutycycle);
+    Write((uint8_t)channel, (uint16_t)dutycycle.toUInt());
 }
 
-uint16_t PwmPCA9685::pwmDutyCycle(int channel)
+QVariant PwmPCA9685::pwmDutyCycle(int channel)
 {
     uint16_t nOn, nOff;
     Read((uint8_t)channel, &nOn, &nOff);
@@ -31,7 +31,7 @@ float PwmPCA9685::pwmFrequency()
     return (float)GetFrequency();
 }
 
-void PwmPCA9685::startPwm(int channel, uint16_t dutyCycle)
+void PwmPCA9685::startPwm(int channel, const QVariant &dutyCycle)
 {
     pwmSetDutyCycle(channel, dutyCycle);
 }

@@ -21,8 +21,8 @@ PwmSoftware::~PwmSoftware()
 
 void PwmSoftware::pwmCalculateTimes()
 {
-    m_pwmReqOn = (long long)((float)m_pwmDutyCycle * m_pwmSliceTime * 10.0);
-    m_pwmReqOff = (long long)((10000.0 - m_pwmDutyCycle) * m_pwmSliceTime * 10.0);
+    m_pwmReqOn = (long long)(m_pwmDutyCycle.toFloat() * m_pwmSliceTime * 100.0);
+    m_pwmReqOff = (long long)((100.0 - m_pwmDutyCycle.toFloat()) * m_pwmSliceTime * 100.0);
     qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff << m_pwmSliceTime;
 }
 
@@ -31,10 +31,10 @@ QPointer<QGpioPort> PwmSoftware::pwmPort() const
     return m_pwmPort;
 }
 
-void PwmSoftware::pwmSetDutyCycle(int channel, uint16_t dutycycle)
+void PwmSoftware::pwmSetDutyCycle(int channel, const QVariant &dutycycle)
 {
     Q_UNUSED(channel)
-    if ((float)dutycycle < 0 || dutycycle > 10000) {
+    if (dutycycle.toFloat() < 0.0f || dutycycle.toFloat() > 100.0f) {
         qWarning() << "Invalid duty cycle provided:" << dutycycle << "Valid values are from 0.0 to 100.0";
         return;
     }
@@ -60,13 +60,13 @@ float PwmSoftware::pwmFrequency()
     return m_pwmFreq;
 }
 
-uint16_t PwmSoftware::pwmDutyCycle(int channel)
+QVariant PwmSoftware::pwmDutyCycle(int channel)
 {
     Q_UNUSED(channel)
     return m_pwmDutyCycle;
 }
 
-void PwmSoftware::startPwm(int channel, uint16_t dutyCycle)
+void PwmSoftware::startPwm(int channel, const QVariant &dutyCycle)
 {
     pwmSetDutyCycle(channel, dutyCycle);
     if (m_pwmRunner == nullptr && m_pwmPort.isNull() == false) {
@@ -93,18 +93,14 @@ void PwmSoftware::pwmThreadRun()
 {
     qDebug() << Q_FUNC_INFO << "thread started for port" << m_pwmPort->getPort();
     while (!m_pwmRunner->isInterruptionRequested()) {
-        if (m_pwmDutyCycle > 0.0) {
-            //qDebug() << "set high";
+        if (m_pwmDutyCycle.toFloat() > 0.0) {
             m_pwmPort->setValue(QGpio::VALUE_HIGH);
             bcm2835_delayMicroseconds(m_pwmReqOn);
-            //QThread::usleep(m_pwmReqOn);
         }
 
-        if (m_pwmDutyCycle < 10000.0) {
-            //qDebug() << "set low";
+        if (m_pwmDutyCycle.toFloat() < 100.0) {
             m_pwmPort->setValue(QGpio::VALUE_LOW);
             bcm2835_delayMicroseconds(m_pwmReqOff);
-            //QThread::usleep(m_pwmReqOff);
         }
     }
 

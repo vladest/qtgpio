@@ -4,7 +4,7 @@
 #include <QtCore/QThread>
 #include <QtCore/QPointer>
 #include "qgpioport.h"
-#include "pwmabstract.h"
+#include "pwmbase.h"
 
 class PwmSoftware : public PwmBase
 {
@@ -12,13 +12,13 @@ public:
     PwmSoftware(int port);
     virtual ~PwmSoftware();
 
-    void pwmSetDutyCycle(int channel, uint16_t dutycycle) override;
-    uint16_t pwmDutyCycle(int channel) override;
+    void pwmSetDutyCycle(int channel, const QVariant& dutycycle) override;
+    QVariant pwmDutyCycle(int channel) override;
 
     void pwmSetFrequency(float freq) override;
     float pwmFrequency() override;
 
-    void startPwm(int channel, uint16_t dutyCycle = 0) override;
+    void startPwm(int channel, const QVariant& dutyCycle = 0) override;
     void stopPwm(int channel) override;
     QPointer<QGpioPort> pwmPort() const;
 

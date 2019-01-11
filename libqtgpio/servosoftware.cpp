@@ -38,7 +38,7 @@ void ServoSoftware::startRotating(float torque)
     else if (torque > 0.0)
         duty_cycle = (float)servoMaxPulse()/200.0 * torque;
     //qDebug() << servoMinPulse() << servoMaxPulse() << torque << duty_cycle;
-    m_pwm->pwmSetDutyCycle(-1, duty_cycle*100);
+    m_pwm->pwmSetDutyCycle(-1, duty_cycle);
 }
 
 void ServoSoftware::rotateAngle(float angle)
