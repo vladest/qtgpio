@@ -21,9 +21,9 @@ PwmSoftware::~PwmSoftware()
 
 void PwmSoftware::pwmCalculateTimes()
 {
-    m_pwmReqOn = (long long)(m_pwmDutyCycle.toFloat() * m_pwmSliceTime * 100.0);
-    m_pwmReqOff = (long long)((100.0 - m_pwmDutyCycle.toFloat()) * m_pwmSliceTime * 100.0);
-    qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff << m_pwmSliceTime;
+    m_pwmReqOn = (long long)(m_pwmDutyCycle.toFloat() * m_pwmSliceTime * 1000.0);
+    m_pwmReqOff = (long long)((100.0 - m_pwmDutyCycle.toFloat()) * m_pwmSliceTime * 1000.0);
+    qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff << m_pwmDutyCycle;
 }
 
 QPointer<QGpioPort> PwmSoftware::pwmPort() const

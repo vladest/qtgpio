@@ -41,7 +41,7 @@ bool inputAvailable()
     struct timeval tv;
     fd_set fds;
     tv.tv_sec = 0;
-    tv.tv_usec = 0;
+    tv.tv_usec = 1000;
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
     select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
@@ -55,6 +55,5 @@ void ConsoleReader::run()
             char key = getch();
             emit KeyPressed(key);
         }
-        msleep(32);
     }
 }

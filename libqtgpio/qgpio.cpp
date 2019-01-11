@@ -105,6 +105,10 @@ void QGpio::addToInputEventsThread(QGpioPort *gpioPort)
         }
     }
 
+    if (gpioPort->addEdgeDetect(QGpio::RISING_EDGE, 666) == false) {
+        qWarning() << "Error adding edge detecion";
+        return;
+    }
     struct epoll_event ev;
     // add to epoll fd
     ev.events = EPOLLIN | EPOLLET | EPOLLPRI;
