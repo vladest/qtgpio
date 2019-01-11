@@ -21,9 +21,9 @@ PwmSoftware::~PwmSoftware()
 
 void PwmSoftware::pwmCalculateTimes()
 {
-    m_pwmReqOn = (long long)(m_pwmDutyCycle * m_pwmSliceTime * 1000.0);
-    m_pwmReqOff = (long long)((100.0 - m_pwmDutyCycle) * m_pwmSliceTime * 1000.0);
-    //qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff;
+    m_pwmReqOn = (long long)((float)m_pwmDutyCycle * m_pwmSliceTime * 10.0);
+    m_pwmReqOff = (long long)((10000.0 - m_pwmDutyCycle) * m_pwmSliceTime * 10.0);
+    qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff << m_pwmSliceTime;
 }
 
 QPointer<QGpioPort> PwmSoftware::pwmPort() const
@@ -34,7 +34,7 @@ QPointer<QGpioPort> PwmSoftware::pwmPort() const
 void PwmSoftware::pwmSetDutyCycle(int channel, uint16_t dutycycle)
 {
     Q_UNUSED(channel)
-    if ((float)dutycycle < 0 || dutycycle > 100) {
+    if ((float)dutycycle < 0 || dutycycle > 10000) {
         qWarning() << "Invalid duty cycle provided:" << dutycycle << "Valid values are from 0.0 to 100.0";
         return;
     }
@@ -96,13 +96,15 @@ void PwmSoftware::pwmThreadRun()
         if (m_pwmDutyCycle > 0.0) {
             //qDebug() << "set high";
             m_pwmPort->setValue(QGpio::VALUE_HIGH);
-            QThread::usleep(m_pwmReqOn);
+            bcm2835_delayMicroseconds(m_pwmReqOn);
+            //QThread::usleep(m_pwmReqOn);
         }
 
-        if (m_pwmDutyCycle < 100.0) {
+        if (m_pwmDutyCycle < 10000.0) {
             //qDebug() << "set low";
             m_pwmPort->setValue(QGpio::VALUE_LOW);
-            QThread::usleep(m_pwmReqOff);
+            bcm2835_delayMicroseconds(m_pwmReqOff);
+            //QThread::usleep(m_pwmReqOff);
         }
     }
 

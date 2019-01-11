@@ -19,10 +19,5 @@ public:
 
 private:
     PwmSoftware* m_pwm = nullptr;
-
-
-
-    // ServoBase interface
-
 };
 

@@ -17,8 +17,8 @@ public slots:
     void OnConsoleKeyPressed(char ch);
 private:
     ConsoleReader *m_consoleReader = nullptr;
-    ServoControl9685* servoPortLeftRight = nullptr;
-    ServoControl9685* servoPortUpDown = nullptr;
+    ServoBase* servoPortLeftRight = nullptr;
+    ServoBase* servoPortUpDown = nullptr;
     PwmSoftware* buzzer;
 };
 

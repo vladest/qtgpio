@@ -27,12 +27,18 @@ void ServoSoftware::stopRotating()
 
 void ServoSoftware::startRotating(float torque)
 {
+
+    if (torque < -1.0f || torque > 1.0f) {
+        qWarning() << "Invalid torque value" << torque << "Must be betwee -1.0 and 1.0";
+        return;
+    }
     float duty_cycle = torque;
     if (torque < 0)
-        duty_cycle = 12.0;
+        duty_cycle = (float)servoMinPulse()/200.0 * qAbs(torque);
     else if (torque > 0.0)
-        duty_cycle = 2.0;
-    m_pwm->pwmSetDutyCycle(-1, duty_cycle);
+        duty_cycle = (float)servoMaxPulse()/200.0 * torque;
+    //qDebug() << servoMinPulse() << servoMaxPulse() << torque << duty_cycle;
+    m_pwm->pwmSetDutyCycle(-1, duty_cycle*100);
 }
 
 void ServoSoftware::rotateAngle(float angle)

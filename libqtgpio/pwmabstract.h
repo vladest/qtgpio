@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-class PwmAbstract
+class PwmBase
 {
 public:
     virtual void pwmSetDutyCycle(int channel, uint16_t dutycycle) = 0;

@@ -46,7 +46,7 @@ void ServoControl9685::startRotating(float torque)
         duty_cycle = minDuty() + dutyRange();
 
     duty_cycle = (duty_cycle + 1) >> 4;
-    qDebug() << "duty cycle" << duty_cycle;
+    //qDebug() << "duty cycle" << duty_cycle;
     m_pwm->pwmSetDutyCycle(m_channel, duty_cycle);
 }
 

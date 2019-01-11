@@ -18,7 +18,8 @@ ServoExample::ServoExample(QObject *parent) : QObject(parent)
     buzzer->pwmSetFrequency(450);
     buzzer->startPwm(0);
     servoPortLeftRight = new ServoControl9685(10);
-    servoPortUpDown = new ServoControl9685(9);
+    //servoPortUpDown = new ServoControl9685(9);
+    servoPortUpDown = new ServoSoftware(17);
 
     //MG995
     servoPortLeftRight->setServoPulses(500, 2300);

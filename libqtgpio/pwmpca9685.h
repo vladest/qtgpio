@@ -6,7 +6,7 @@
 #include "pwmabstract.h"
 #include "pca9685/pca9685.h"
 
-class PwmPCA9685 : public PwmAbstract, public PCA9685
+class PwmPCA9685 : public PwmBase, public PCA9685
 {
 public:
     PwmPCA9685(uint8_t port = PCA9685_I2C_ADDRESS_DEFAULT);

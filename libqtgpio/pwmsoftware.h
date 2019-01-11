@@ -6,7 +6,7 @@
 #include "qgpioport.h"
 #include "pwmabstract.h"
 
-class PwmSoftware : public PwmAbstract
+class PwmSoftware : public PwmBase
 {
 public:
     PwmSoftware(int port);
