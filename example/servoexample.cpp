@@ -28,6 +28,9 @@ ServoExample::ServoExample(QObject *parent) : QObject(parent)
     servoPortLeftRight->setServoPulses(500, 2300);
     //MG90S
     servoPortUpDown->setServoPulses(550, 2250);
+    ultrasound = new HCSR04Sensor(12, 16);
+    connect(ultrasound, &HCSR04Sensor::distanceChanged, this, &ServoExample::onDistanceChanged/*, Qt::QueuedConnection*/);
+    ultrasound->start(QThread::NormalPriority);
 }
 
 ServoExample::~ServoExample()
@@ -39,6 +42,7 @@ ServoExample::~ServoExample()
     delete servoPortUpDown;
     delete servoPortLeftRight;
     delete buzzer;
+    //delete ultrasound;
     qDebug() << "Shutdown servo finished";
 }
 
@@ -97,4 +101,9 @@ void ServoExample::OnConsoleKeyPressed(char ch)
             esc = esc_seq = false;
         }
     }
+}
+
+void ServoExample::onDistanceChanged(float distance)
+{
+    qDebug() << "distance" << distance;
 }

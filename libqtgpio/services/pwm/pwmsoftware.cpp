@@ -5,6 +5,7 @@
 
 PwmSoftware::PwmSoftware(int port)
 {
+    m_pwmDutyCycle = 0.0f;
     m_gpio = QGpio::getInstance();
     if (m_gpio->init() == QGpio::INIT_OK) {
         m_pwmPort = m_gpio->allocateGpioPort(port, QGpio::DIRECTION_OUTPUT);
@@ -74,7 +75,7 @@ void PwmSoftware::startPwm(int channel, const QVariant &dutyCycle)
         m_pwmRunner = QThread::create([&]{
             pwmThreadRun();
         });
-        m_pwmRunner->start(QThread::TimeCriticalPriority);
+        m_pwmRunner->start(QThread::NormalPriority);
     }
 }
 

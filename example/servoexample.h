@@ -4,6 +4,7 @@
 #include "pwm/pwmsoftware.h"
 #include "consolereader.h"
 #include "servo/servobase.h"
+#include "sensors/hcsr04sensor.h"
 
 class ServoExample : public QObject
 {
@@ -14,10 +15,12 @@ public:
 
 public slots:
     void OnConsoleKeyPressed(char ch);
+    void onDistanceChanged(float distance);
 private:
     ConsoleReader *m_consoleReader = nullptr;
     ServoBase* servoPortLeftRight = nullptr;
     ServoBase* servoPortUpDown = nullptr;
     PwmSoftware* buzzer;
+    HCSR04Sensor* ultrasound = nullptr;
 };
 

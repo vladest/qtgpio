@@ -12,7 +12,8 @@ SOURCES += \
     $$PWD/services/pwm/pwmpca9685.cpp \
     $$PWD/services/servo/servocontrol9685.cpp \
     $$PWD/services/servo/servobase.cpp \
-    $$PWD/services/servo/servosoftware.cpp
+    $$PWD/services/servo/servosoftware.cpp \
+    $$PWD/services/sensors/hcsr04sensor.cpp
 
 HEADERS += \
     $$PWD/qgpio.h \
@@ -25,4 +26,5 @@ HEADERS += \
     $$PWD/services/servo/servocontrol9685.h \
     $$PWD/services/servo/servobase.h \
     $$PWD/services/servo/servosoftware.h \
-    $$PWD/services/pwm/pwmbase.h
+    $$PWD/services/pwm/pwmbase.h \
+    $$PWD/services/sensors/hcsr04sensor.h

@@ -55,5 +55,6 @@ void ConsoleReader::run()
             char key = getch();
             emit KeyPressed(key);
         }
+        msleep(1);
     }
 }
