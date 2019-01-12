@@ -1,6 +1,6 @@
 CONFIG += c++14
 
-INCLUDEPATH += $$PWD/rpi $$PWD/hats $$PWD/services/
+INCLUDEPATH += $$PWD $$PWD/rpi $$PWD/hats $$PWD/services
 
 SOURCES += \
     $$PWD/qgpio.cpp \
