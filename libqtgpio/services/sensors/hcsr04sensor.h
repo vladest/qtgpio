@@ -46,6 +46,7 @@ private:
     QPointer<QGpioPort> m_triggerPort;
     float m_distance = -1.0;
     int m_measureRate = 10; //times per second
+    uint64_t m_delay = 100000ULL;
 };
 
 #endif // HCSR04SENSOR_H

@@ -37,6 +37,7 @@ void HCSR04Sensor::stop()
 void HCSR04Sensor::run()
 {
     while (!isInterruptionRequested()) {
+
         // Send trig pulse
         m_triggerPort->setValue(QGpio::VALUE_HIGH);
         delayMicroseconds(20);
@@ -63,7 +64,6 @@ void HCSR04Sensor::run()
             if (travelTime > TRAVEL_TIME_MAX) {
                 continue;
             }
-            delayMicroseconds(100);
         }
 
         // Return distance in cm
@@ -74,8 +74,8 @@ void HCSR04Sensor::run()
                 emit distanceChanged(m_distance);
             }
         }
-        uint64_t delay = 1000000/m_measureRate;
-        delayMicroseconds(delay);
+
+        delayMicroseconds(m_delay);
     }
 }
 
@@ -87,6 +87,7 @@ int HCSR04Sensor::measureRate() const
 void HCSR04Sensor::setMeasureRate(int measureRate)
 {
     m_measureRate = measureRate;
+    m_delay = 1000000ULL/m_measureRate;
 }
 
 

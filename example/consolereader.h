@@ -8,7 +8,7 @@ class ConsoleReader : public QThread
 {
     Q_OBJECT
 signals:
-    void KeyPressed(char ch);
+    void keyPressed(int ch);
 public:
    ConsoleReader();
    virtual ~ConsoleReader();
@@ -20,7 +20,6 @@ private:
    struct termios oldSettings;
    struct termios newSettings;
 
-   char getch();
    void resetTermios();
    void initTermios(int echo);
 };

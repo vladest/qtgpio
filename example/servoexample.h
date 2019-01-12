@@ -14,7 +14,7 @@ public:
     virtual ~ServoExample();
 
 public slots:
-    void OnConsoleKeyPressed(char ch);
+    void onConsoleKeyPressed(int ch);
     void onDistanceChanged(float distance);
 private:
     ConsoleReader *m_consoleReader = nullptr;

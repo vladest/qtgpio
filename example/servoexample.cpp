@@ -14,23 +14,25 @@ inline unsigned long delayus(float angle) {
 ServoExample::ServoExample(QObject *parent) : QObject(parent)
 {
     m_consoleReader = new ConsoleReader();
-    connect (m_consoleReader, SIGNAL (KeyPressed(char)), this, SLOT(OnConsoleKeyPressed(char)));
+    connect (m_consoleReader, &ConsoleReader::keyPressed, this, &ServoExample::onConsoleKeyPressed,
+             Qt::QueuedConnection);
     m_consoleReader->start();
 
     buzzer = new PwmSoftware(18);
     buzzer->pwmSetFrequency(450);
     buzzer->startPwm(0);
-    servoPortLeftRight = new ServoControl9685(10);
-    //servoPortUpDown = new ServoControl9685(9);
-    servoPortUpDown = new ServoSoftware(17);
+    servoPortLeftRight = new ServoControl9685(11);
+    servoPortUpDown = new ServoControl9685(9);
+    //servoPortUpDown = new ServoSoftware(17);
 
     //MG995
-    servoPortLeftRight->setServoPulses(500, 2300);
+    //servoPortLeftRight->setServoPulses(500, 2300);
+    servoPortLeftRight->setServoPulses(550, 2250);
     //MG90S
     servoPortUpDown->setServoPulses(550, 2250);
     ultrasound = new HCSR04Sensor(12, 16);
-    connect(ultrasound, &HCSR04Sensor::distanceChanged, this, &ServoExample::onDistanceChanged/*, Qt::QueuedConnection*/);
-    ultrasound->start(QThread::NormalPriority);
+    connect(ultrasound, &HCSR04Sensor::distanceChanged, this, &ServoExample::onDistanceChanged, Qt::QueuedConnection);
+    //ultrasound->start(QThread::NormalPriority);
 }
 
 ServoExample::~ServoExample()
@@ -46,7 +48,7 @@ ServoExample::~ServoExample()
     qDebug() << "Shutdown servo finished";
 }
 
-void ServoExample::OnConsoleKeyPressed(char ch)
+void ServoExample::onConsoleKeyPressed(int ch)
 {
     static bool esc = false;
     static bool esc_seq = false;
@@ -54,11 +56,11 @@ void ServoExample::OnConsoleKeyPressed(char ch)
     //qDebug() << "char pressed" << QString::number(ch, 16).toUpper();
     if (ch == 0x1B) {
         esc = true;
+        esc_seq = false;
         //escpressTimer.start();
     } else {
         if (ch == 0x5B) {
-            if (esc)
-                esc_seq = true;
+            esc_seq = esc;
         } else {
             if (ch == 0xA || ch == 'q') {
                 m_consoleReader->requestInterruption();
@@ -69,19 +71,19 @@ void ServoExample::OnConsoleKeyPressed(char ch)
                 else
                     buzzer->pwmSetDutyCycle(-1, 0.0);
             }  else if (ch == 0x41) { //UP
-                qDebug() << "UP" << esc_seq;
+                qDebug() << "UP";
                 if (esc_seq)
                     servoPortUpDown->startRotating(-1.0);
             } else if (ch == 0x42) { //DOWN
-                qDebug() << "DOWN" << esc_seq;
+                qDebug() << "DOWN";
                 if (esc_seq)
                     servoPortUpDown->startRotating(1.0);
             } else if (ch == 0x44) { //LEFT
-                qDebug() << "LEFT" << esc_seq;
+                qDebug() << "LEFT";
                 if (esc_seq)
                     servoPortLeftRight->startRotating(-1.0);
             } else if (ch == 0x43) { //RIGHT
-                qDebug() << "RIGHT" << esc_seq;
+                qDebug() << "RIGHT";
                 if (esc_seq)
                     servoPortLeftRight->startRotating(1.0);
             } else if (ch == 'a') { //LEFT
