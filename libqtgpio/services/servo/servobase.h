@@ -7,6 +7,13 @@ class ServoBase : public QObject
 {
     Q_OBJECT
 public:
+    enum KnownServos {
+        TowerPro_MG995,
+        TowerPro_MG90S
+    };
+
+    Q_ENUM(KnownServos)
+
     explicit ServoBase(QObject *parent = nullptr);
 
     float actuactionRange() const;
@@ -28,6 +35,10 @@ public:
      * trying to reach out behind its threshold. In this case it will consume power and overheat
      */
     void setServoPulses(uint16_t minPulse, uint16_t maxPulse);
+    void setServoPulses(KnownServos servo);
+
+    QPair<uint16_t, uint16_t> servoPulses(const char *name);
+    QPair<uint16_t, uint16_t> servoPulses(KnownServos servo);
     uint16_t servoMinPulse() const;
     uint16_t servoMaxPulse() const;
 
