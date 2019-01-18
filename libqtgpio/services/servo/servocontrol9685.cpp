@@ -46,6 +46,7 @@ void ServoControl9685::setAngle(float angle)
     float fraction = angle / actuactionRange();
     uint16_t  duty_cycle = minDuty() + (int)(fraction * dutyRange());
     duty_cycle = (duty_cycle + 1) >> 4;
+    //qDebug() << __PRETTY_FUNCTION__ << duty_cycle;
     m_pwm->pwmSetDutyCycle(m_channel, duty_cycle);
 }
 

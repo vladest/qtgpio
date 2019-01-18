@@ -8,12 +8,19 @@ class ServoBase : public QObject
     Q_OBJECT
 public:
     enum KnownServos {
-        TowerPro_MG995,
-        TowerPro_MG90S
+        MG995,
+        MG90S,
+        SG90
     };
 
     Q_ENUM(KnownServos)
 
+    struct ServoParameters {
+        KnownServos servo;
+        uint16_t minPulse;
+        uint16_t maxPulse;
+        float actuationRange;
+    };
     explicit ServoBase(QObject *parent = nullptr);
 
     float actuactionRange() const;
@@ -37,8 +44,8 @@ public:
     void setServoPulses(uint16_t minPulse, uint16_t maxPulse);
     void setServoPulses(KnownServos servo);
 
-    QPair<uint16_t, uint16_t> servoPulses(const char *name);
-    QPair<uint16_t, uint16_t> servoPulses(KnownServos servo);
+    ServoParameters servoPulses(const char *name);
+    ServoParameters servoPulses(KnownServos servo);
     uint16_t servoMinPulse() const;
     uint16_t servoMaxPulse() const;
 

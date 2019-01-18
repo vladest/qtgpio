@@ -2,9 +2,10 @@
 #include <QMetaEnum>
 #include <QMap>
 
-const QMap<ServoBase::KnownServos, QPair<uint16_t, uint16_t> > knownServosPulses = {
-    { ServoBase::TowerPro_MG90S, QPair<uint16_t, uint16_t>(550, 2250) },
-    { ServoBase::TowerPro_MG995, QPair<uint16_t, uint16_t>(500, 2300) }
+const QMap<ServoBase::KnownServos, ServoBase::ServoParameters > knownServosPulses = {
+    { ServoBase::MG90S, { ServoBase::MG90S, 550, 2250, 180.0 } },
+    { ServoBase::MG995, { ServoBase::MG995, 500, 2300, 180.0 } },
+    { ServoBase::SG90, { ServoBase::SG90, 500, 2400, 135.0 } },
 };
 
 ServoBase::ServoBase(QObject *parent) : QObject(parent)
@@ -43,16 +44,17 @@ void ServoBase::setServoPulses(uint16_t minPulse, uint16_t maxPulse)
 
 void ServoBase::setServoPulses(ServoBase::KnownServos servo)
 {
-    QPair<uint16_t, uint16_t> _pulses = knownServosPulses.value(servo);
-    setServoPulses(_pulses.first, _pulses.second);
+    ServoParameters _pulses = knownServosPulses.value(servo);
+    setServoPulses(_pulses.minPulse, _pulses.maxPulse);
+    setActuactionRange(_pulses.actuationRange);
 }
 
-QPair<uint16_t, uint16_t> ServoBase::servoPulses(ServoBase::KnownServos servo)
+ServoBase::ServoParameters ServoBase::servoPulses(ServoBase::KnownServos servo)
 {
     return knownServosPulses.value(servo);
 }
 
-QPair<uint16_t, uint16_t> ServoBase::servoPulses(const char* name)
+ServoBase::ServoParameters ServoBase::servoPulses(const char* name)
 {
     const QMetaObject &mo = ServoBase::staticMetaObject;
     int index = mo.indexOfEnumerator("KnownServos");
