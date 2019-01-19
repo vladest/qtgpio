@@ -1,6 +1,12 @@
 #include "motormc33886.h"
 #include "services/pwm/pwmsoftware.h"
 
+/**
+ * @brief MotorMC33886::MotorMC33886
+ * @param parent
+ * support for MC33886 Raspberry Pi Motor Driver Board
+ *
+ */
 MotorMC33886::MotorMC33886(QObject *parent) : QObject(parent)
 {
     QGpio* gpio = QGpio::getInstance();
