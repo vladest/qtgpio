@@ -3,7 +3,7 @@
 #include <QObject>
 #include "consolereader.h"
 #include "servo/servobase.h"
-
+#include "motor/motormc33886.h"
 class ServoExample : public QObject
 {
     Q_OBJECT
@@ -17,5 +17,6 @@ private:
     ConsoleReader *m_consoleReader = nullptr;
     ServoBase* servoPortLeftRight = nullptr;
     ServoBase* servoPortUpDown = nullptr;
+    MotorMC33886* m_motor = nullptr;
 };
 

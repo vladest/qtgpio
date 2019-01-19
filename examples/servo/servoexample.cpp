@@ -22,6 +22,8 @@ ServoExample::ServoExample(QObject *parent) : QObject(parent)
     //MG90S
     servoPortLeftRight->setServoPulses(550, 2250);
     servoPortUpDown->setServoPulses(550, 2250);
+
+    m_motor = new MotorMC33886;
 }
 
 ServoExample::~ServoExample()
@@ -50,16 +52,20 @@ void ServoExample::onConsoleKeyPressed(int ch)
                 qApp->exit();
             } else if (ch == 0x41) { //UP
                 if (esc_seq)
-                    servoPortUpDown->startRotating(-1.0);
+                    m_motor->forward();
+                    //servoPortUpDown->startRotating(-1.0);
             } else if (ch == 0x42) { //DOWN
                 if (esc_seq)
-                    servoPortUpDown->startRotating(1.0);
+                    m_motor->reverse();
+                    //servoPortUpDown->startRotating(1.0);
             } else if (ch == 0x44) { //LEFT
                 if (esc_seq)
-                    servoPortLeftRight->startRotating(-1.0);
+                    m_motor->left();
+                    //servoPortLeftRight->startRotating(-1.0);
             } else if (ch == 0x43) { //RIGHT
                 if (esc_seq)
-                    servoPortLeftRight->startRotating(1.0);
+                    m_motor->right();
+                    //servoPortLeftRight->startRotating(1.0);
             } else if (ch == 'a') { //LEFT
                 servoPortLeftRight->setAngle(0);
             } else if (ch == 'd') { //RIGHT
@@ -68,9 +74,14 @@ void ServoExample::onConsoleKeyPressed(int ch)
                 servoPortUpDown->setAngle(0);
             } else if (ch == 's') { //RIGHT
                 servoPortUpDown->setAngle(180);
-            }else if (ch == 0x20) { //SPACE
+            }  else if (ch == '+') { //LEFT
+                m_motor->setSpeed(m_motor->speed() + 5.0);
+            } else if (ch == '-') { //RIGHT
+                m_motor->setSpeed(m_motor->speed() - 5.0);
+            } else if (ch == 0x20) { //SPACE
                 servoPortLeftRight->stopRotating();
                 servoPortUpDown->stopRotating();
+                m_motor->stop();
             }
 
             esc = esc_seq = false;
