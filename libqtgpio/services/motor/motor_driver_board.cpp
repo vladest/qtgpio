@@ -120,15 +120,15 @@ void MotorDriverBoard::run()
         if (m_irPort->value() == QGpio::VALUE_LOW) {
             int count = 0;
 
-            while (m_irPort->value() == QGpio::VALUE_LOW && count < 200) { //  #9ms
+            while (m_irPort->value() == QGpio::VALUE_LOW && count < 10) { //  #9ms
                 count += 1;
-                delayMicroseconds(60);
+                usleep(900);
             }
 
             count = 0;
-            while (m_irPort->value() == QGpio::VALUE_HIGH && count < 80) { //  #4.5ms
+            while (m_irPort->value() == QGpio::VALUE_HIGH && count < 10) { //  #4.5ms
                 count += 1;
-                delayMicroseconds(60);
+                usleep(450);
             }
 
             int idx = 0;
@@ -138,12 +138,12 @@ void MotorDriverBoard::run()
                 count = 0;
                 while (m_irPort->value() == QGpio::VALUE_LOW && count < 15) { //  #0.56ms
                     count += 1;
-                    delayMicroseconds(60);
+                    usleep(60);
                 }
                 count = 0;
-                while (m_irPort->value() == QGpio::VALUE_HIGH && count < 40) { //  #0: 0.56ms #1: 1.69ms
+                while (m_irPort->value() == QGpio::VALUE_HIGH && count < 20) { //  #0: 0.56ms #1: 1.69ms
                     count += 1;
-                    delayMicroseconds(60);
+                    usleep(120);
                 }
 
                 if (count > 8)

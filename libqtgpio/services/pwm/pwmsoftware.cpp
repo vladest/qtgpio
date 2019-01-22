@@ -92,16 +92,18 @@ void PwmSoftware::stopPwm(int channel)
 
 void PwmSoftware::pwmThreadRun()
 {
-    qDebug() << Q_FUNC_INFO << "thread started for port" << m_pwmPort->getPort();
+    qDebug() << Q_FUNC_INFO << "thread started for port" << m_pwmPort->getPort() << m_pwmReqOn << m_pwmReqOff;
     while (!m_pwmRunner->isInterruptionRequested()) {
         if (m_pwmDutyCycle.toFloat() > 0.0) {
             m_pwmPort->setValue(QGpio::VALUE_HIGH);
-            bcm2835_delayMicroseconds(m_pwmReqOn);
+            QThread::usleep(m_pwmReqOn);
+            //bcm2835_delayMicroseconds(m_pwmReqOn);
         }
 
         if (m_pwmDutyCycle.toFloat() < 100.0) {
             m_pwmPort->setValue(QGpio::VALUE_LOW);
-            bcm2835_delayMicroseconds(m_pwmReqOff);
+            QThread::usleep(m_pwmReqOff);
+            //bcm2835_delayMicroseconds(m_pwmReqOff);
         }
     }
 
