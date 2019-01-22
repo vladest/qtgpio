@@ -14,7 +14,8 @@ SOURCES += \
     $$PWD/services/servo/servobase.cpp \
     $$PWD/services/servo/servosoftware.cpp \
     $$PWD/services/sensors/hcsr04sensor.cpp \
-    $$PWD/services/motor/motormc33886.cpp
+    $$PWD/services/motor/motorbase.cpp \
+    $$PWD/services/motor/motor_driver_board.cpp
 
 HEADERS += \
     $$PWD/qgpio.h \
@@ -29,4 +30,5 @@ HEADERS += \
     $$PWD/services/servo/servosoftware.h \
     $$PWD/services/pwm/pwmbase.h \
     $$PWD/services/sensors/hcsr04sensor.h \
-    $$PWD/services/motor/motormc33886.h
+    $$PWD/services/motor/motorbase.h \
+    $$PWD/services/motor/motor_driver_board.h

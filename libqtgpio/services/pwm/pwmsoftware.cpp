@@ -24,7 +24,7 @@ void PwmSoftware::pwmCalculateTimes()
 {
     m_pwmReqOn = (long long)(m_pwmDutyCycle.toFloat() * m_pwmSliceTime * 1000.0);
     m_pwmReqOff = (long long)((100.0 - m_pwmDutyCycle.toFloat()) * m_pwmSliceTime * 1000.0);
-    qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff << m_pwmDutyCycle;
+    //qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff << m_pwmDutyCycle;
 }
 
 QPointer<QGpioPort> PwmSoftware::pwmPort() const
@@ -84,7 +84,7 @@ void PwmSoftware::stopPwm(int channel)
     Q_UNUSED(channel)
     if (m_pwmRunner != nullptr) {
         m_pwmRunner->requestInterruption();
-        m_pwmRunner->wait(m_pwmReqOn + m_pwmReqOff + 100);
+        m_pwmRunner->wait(m_pwmReqOn + m_pwmReqOff + 1000);
         delete m_pwmRunner;
         m_pwmRunner = nullptr;
     }

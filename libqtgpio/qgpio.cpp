@@ -48,6 +48,8 @@ QPointer<QGpioPort> QGpio::allocateGpioPort(int port, GpioDirection direction, G
         _port = new QGpioPort(port, direction, pud);
         _port->setGpioParent(this);
         m_PortsAllocated[port] = _port;
+    } else {
+        qWarning() << "port" << port << "already allocated";
     }
     return _port;
 }
@@ -76,6 +78,10 @@ QGpio::QGpio() : QObject(nullptr)
 
 QGpio::~QGpio()
 {
+    while(!m_PortsAllocated.values().isEmpty()) {
+        QPointer<QGpioPort> port = m_PortsAllocated.values().takeFirst();
+        deallocateGpioPort(port);
+    }
     deinit();
 }
 
