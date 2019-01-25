@@ -8,7 +8,7 @@
 
 #include "pca9685.h"
 #include <sys/mman.h>
-
+#include "qgpio.h"
 extern "C" {
  extern void bcm2835_delayMicroseconds (uint64_t);
  #define udelay bcm2835_delayMicroseconds
@@ -60,6 +60,9 @@ enum TPCA9685Mode2 {
 };
 
 PCA9685::PCA9685(uint8_t nAddress) : m_nAddress(nAddress) {
+    if (QGpio::getInstance()->init() != QGpio::INIT_OK) {
+        printf("Error init QGpio\n");
+    }
     if (bcm2835_regbase(BCM2835_REGBASE_BSC0) == MAP_FAILED) {
         if (bcm2835_init() == 0) {
             printf("Not able to init the bmc2835 library\n");

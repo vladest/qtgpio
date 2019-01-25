@@ -73,6 +73,10 @@ void QGpio::deallocateGpioPort(QPointer<QGpioPort> port)
 
 QGpio::QGpio() : QObject(nullptr)
 {
+#if defined(ROBOCORE_ON_DESKTOP)
+    bcm2835_set_debug(1);
+#endif
+
     qDebug() << m_rpiCpuInfo.boardString();
 }
 

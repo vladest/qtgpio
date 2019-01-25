@@ -169,7 +169,7 @@ uint32_t bcm2835_peri_read(volatile uint32_t* paddr)
     uint32_t ret;
     if (debug)
     {
-        printf("bcm2835_peri_read  paddr %p\n", (void *) paddr);
+        //printf("bcm2835_peri_read  paddr %p\n", (void *) paddr);
         return 0;
     }
     else
@@ -191,7 +191,7 @@ uint32_t bcm2835_peri_read_nb(volatile uint32_t* paddr)
 {
     if (debug)
     {
-        printf("bcm2835_peri_read_nb  paddr %p\n", paddr);
+        //printf("bcm2835_peri_read_nb  paddr %p\n", paddr);
         return 0;
     }
     else
@@ -207,7 +207,7 @@ void bcm2835_peri_write(volatile uint32_t* paddr, uint32_t value)
 {
     if (debug)
     {
-        printf("bcm2835_peri_write paddr %p, value %08X\n", paddr, value);
+        //printf("bcm2835_peri_write paddr %p, value %08X\n", paddr, value);
     }
     else
     {
@@ -222,8 +222,8 @@ void bcm2835_peri_write_nb(volatile uint32_t* paddr, uint32_t value)
 {
     if (debug)
     {
-        printf("bcm2835_peri_write_nb paddr %p, value %08X\n",
-               paddr, value);
+//        printf("bcm2835_peri_write_nb paddr %p, value %08X\n",
+//               paddr, value);
     }
     else
     {
@@ -1168,6 +1168,9 @@ uint8_t bcm2835_i2c_write(const char * buf, uint32_t len)
     uint32_t i = 0;
     uint8_t reason = BCM2835_I2C_REASON_OK;
 
+    if (debug)
+        return reason;
+
     /* Clear FIFO */
     bcm2835_peri_set_bits(control, BCM2835_BSC_C_CLEAR_1 , BCM2835_BSC_C_CLEAR_1 );
     /* Clear Status */
@@ -1238,6 +1241,9 @@ uint8_t bcm2835_i2c_read(char* buf, uint32_t len)
     uint32_t remaining = len;
     uint32_t i = 0;
     uint8_t reason = BCM2835_I2C_REASON_OK;
+
+    if (debug)
+        return reason;
 
     /* Clear FIFO */
     bcm2835_peri_set_bits(control, BCM2835_BSC_C_CLEAR_1 , BCM2835_BSC_C_CLEAR_1 );
