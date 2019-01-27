@@ -24,7 +24,7 @@ void PwmSoftware::pwmCalculateTimes()
 {
     m_pwmReqOn = (long long)(m_pwmDutyCycle.toFloat() * m_pwmSliceTime * 1000.0);
     m_pwmReqOff = (long long)((100.0 - m_pwmDutyCycle.toFloat()) * m_pwmSliceTime * 1000.0);
-    //qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff << m_pwmDutyCycle;
+    qDebug() << "PWM pulse time: on" << m_pwmReqOn << "off" << m_pwmReqOff << m_pwmDutyCycle;
 }
 
 QPointer<QGpioPort> PwmSoftware::pwmPort() const
@@ -75,7 +75,7 @@ void PwmSoftware::startPwm(int channel, const QVariant &dutyCycle)
         m_pwmRunner = QThread::create([&]{
             pwmThreadRun();
         });
-        m_pwmRunner->start(QThread::NormalPriority);
+        m_pwmRunner->start(QThread::TimeCriticalPriority);
     }
 }
 
@@ -84,7 +84,7 @@ void PwmSoftware::stopPwm(int channel)
     Q_UNUSED(channel)
     if (m_pwmRunner != nullptr) {
         m_pwmRunner->requestInterruption();
-        m_pwmRunner->wait(m_pwmReqOn + m_pwmReqOff + 1000);
+        m_pwmRunner->wait(m_pwmReqOn + m_pwmReqOff + 10000);
         delete m_pwmRunner;
         m_pwmRunner = nullptr;
     }
@@ -93,17 +93,25 @@ void PwmSoftware::stopPwm(int channel)
 void PwmSoftware::pwmThreadRun()
 {
     qDebug() << Q_FUNC_INFO << "thread started for port" << m_pwmPort->getPort() << m_pwmReqOn << m_pwmReqOff;
+    quint64 start = 0;
+    quint64 end = 0;
     while (!m_pwmRunner->isInterruptionRequested()) {
         if (m_pwmDutyCycle.toFloat() > 0.0) {
             m_pwmPort->setValue(QGpio::VALUE_HIGH);
+            start = bcm2835_st_read();
             QThread::usleep(m_pwmReqOn);
-            //bcm2835_delayMicroseconds(m_pwmReqOn);
+            end = bcm2835_st_read();
+            if ((end - start) <  m_pwmReqOn)
+                bcm2835_delayMicroseconds(end - start);
         }
 
         if (m_pwmDutyCycle.toFloat() < 100.0) {
             m_pwmPort->setValue(QGpio::VALUE_LOW);
+            start = bcm2835_st_read();
             QThread::usleep(m_pwmReqOff);
-            //bcm2835_delayMicroseconds(m_pwmReqOff);
+            end = bcm2835_st_read();
+            if ((end - start) <  m_pwmReqOff)
+                bcm2835_delayMicroseconds(end - start);
         }
     }
 
