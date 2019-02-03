@@ -192,9 +192,7 @@ bool QGpioPort::addEdgeDetect(QGpio::GpioEdge edge, int bouncetime)
     gpioSetEdge(edge);
     m_edge = edge;
     m_bouncetime = bouncetime;
-    if (!m_gpio.isNull()) {
-        m_gpio->addToInputEventsThread(this);
-    }
+
     return true;
 }
 

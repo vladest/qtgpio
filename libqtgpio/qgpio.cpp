@@ -153,6 +153,7 @@ void QGpio::inputEventThreadFunc() {
             if (g == nullptr) {
                 qWarning() << "No GPIO port associated with FD" << events.data.fd;
             }
+            qDebug() << "interrunpt at port" << g->getPort();
             if (g->getInitialTrigger()) {     // ignore first epoll trigger
                 g->setInitialTrigger(true);
             } else {

@@ -20,6 +20,7 @@ public:
     void setValue(QGpio::GpioValue value);
     QGpio::GpioValue value();
 
+    void operator=(const QGpio::GpioValue value) { setValue(value); }
     /**
      * @brief addEdgeDetect: setup GPIO filesystem for epoll and add GPIO port to epoll thread
      * @return file descriptor for value
