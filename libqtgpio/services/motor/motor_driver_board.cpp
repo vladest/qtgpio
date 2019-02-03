@@ -14,6 +14,7 @@ MotorMC33886::MotorMC33886(int speedPort, int p1, int p2, QObject *parent) : Mot
 
 MotorMC33886::~MotorMC33886()
 {
+    stop();
     QGpio* gpio = QGpio::getInstance();
     m_speedPwm->stopPwm(-1);
     gpio->deallocateGpioPort(m_port1);
