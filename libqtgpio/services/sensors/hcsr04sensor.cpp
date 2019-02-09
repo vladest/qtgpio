@@ -71,14 +71,12 @@ void HCSR04Sensor::run()
             }
         }
 
-        if (travelTime <= TRAVEL_TIME_MAX) {
+        if (travelTime > 0 && travelTime <= TRAVEL_TIME_MAX) {
             // Return distance in cm
-            if (travelTime > 0) {
-                float _dist = (double)travelTime / DIST_SCALE;
-                if (_dist != m_distance) {
-                    m_distance = _dist;
-                    emit distanceChanged(m_distance);
-                }
+            float _dist = (double)travelTime / DIST_SCALE;
+            if (_dist != m_distance) {
+                m_distance = _dist;
+                emit distanceChanged(m_distance);
             }
         }
 
