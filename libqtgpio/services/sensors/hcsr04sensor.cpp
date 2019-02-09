@@ -1,5 +1,6 @@
 #include "hcsr04sensor.h"
 #include "qgpio.h"
+#include <QDebug>
 
 const static float MAX_DISTANCE = 400;
 const static float DIST_SCALE = 58.0;
@@ -49,10 +50,14 @@ void HCSR04Sensor::run()
         int bail = 1000;
         while(m_echoPort->value() == QGpio::VALUE_LOW) {
             if (--bail == 0) {
-                continue;
+                break;
             }
         }
 
+        if (bail == 0) {
+            delayMicroseconds(m_delay);
+            continue;
+        }
         // Measure time for echo. Return early if the
         // pulse is appearing to take too long. Note:
         // error case of never going LOW results in
@@ -62,16 +67,18 @@ void HCSR04Sensor::run()
         while(m_echoPort->value() == QGpio::VALUE_HIGH) {
             travelTime = bcm2835_st_read() - startTime;
             if (travelTime > TRAVEL_TIME_MAX) {
-                continue;
+                break;
             }
         }
 
-        // Return distance in cm
-        if (travelTime > 0) {
-            float _dist = (double)travelTime / DIST_SCALE;
-            if (_dist != m_distance) {
-                m_distance = _dist;
-                emit distanceChanged(m_distance);
+        if (travelTime <= TRAVEL_TIME_MAX) {
+            // Return distance in cm
+            if (travelTime > 0) {
+                float _dist = (double)travelTime / DIST_SCALE;
+                if (_dist != m_distance) {
+                    m_distance = _dist;
+                    emit distanceChanged(m_distance);
+                }
             }
         }
 
