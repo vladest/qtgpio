@@ -10,6 +10,7 @@ SOURCES += \
     $$PWD/hats/pca9685/pca9685.cpp \
     $$PWD/services/pwm/pwmsoftware.cpp \
     $$PWD/services/pwm/pwmpca9685.cpp \
+    $$PWD/services/sensors/octosonarsensor.cpp \
     $$PWD/services/servo/servocontrol9685.cpp \
     $$PWD/services/servo/servobase.cpp \
     $$PWD/services/servo/servosoftware.cpp \
@@ -25,6 +26,7 @@ HEADERS += \
     $$PWD/hats/pca9685/pca9685.h \
     $$PWD/services/pwm/pwmsoftware.h \
     $$PWD/services/pwm/pwmpca9685.h \
+    $$PWD/services/sensors/octosonarsensor.h \
     $$PWD/services/servo/servocontrol9685.h \
     $$PWD/services/servo/servobase.h \
     $$PWD/services/servo/servosoftware.h \

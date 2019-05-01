@@ -9,6 +9,8 @@
 #include "pca9685.h"
 #include <sys/mman.h>
 #include "qgpio.h"
+#include <QDebug>
+
 extern "C" {
  extern void bcm2835_delayMicroseconds (uint64_t);
  #define udelay bcm2835_delayMicroseconds
@@ -292,7 +294,6 @@ uint16_t PCA9685::CalcFrequency(uint8_t nPreScale) {
 }
 
 void PCA9685::Dump(void) {
-#ifndef NDEBUG
     uint8_t reg = I2cReadReg(PCA9685_REG_MODE1);
 
     printf("MODE1 - Mode register 1 (address 00h) : %02Xh\n", reg);
@@ -334,7 +335,7 @@ void PCA9685::Dump(void) {
     Read(16, &on, &off);
     printf("ALL_LED_ON  : %04x\n", on);
     printf("ALL_LED_OFF : %04x\n", off);
-#endif
+
 }
 
 void PCA9685::AutoIncrement(bool bMode) {
@@ -352,6 +353,7 @@ void PCA9685::AutoIncrement(bool bMode) {
 void PCA9685::I2cSetup(void) {
     bcm2835_i2c_setSlaveAddress(m_nAddress);
     bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_626);
+    //bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_626);
 }
 
 void PCA9685::I2cWriteReg(uint8_t reg, uint8_t data) {
@@ -362,7 +364,10 @@ void PCA9685::I2cWriteReg(uint8_t reg, uint8_t data) {
 
     I2cSetup();
 
-    bcm2835_i2c_write((char *)buffer, 2);
+    uint8_t rc = bcm2835_i2c_write((char *)buffer, 2);
+    if (rc != BCM2835_I2C_REASON_OK) {
+        qDebug() << "Error writing i2c PCA9685" << __PRETTY_FUNCTION__ << rc;
+    }
 }
 
 uint8_t PCA9685::I2cReadReg(uint8_t reg) {
@@ -385,7 +390,10 @@ void PCA9685::I2cWriteReg(uint8_t reg, uint16_t data) {
 
     I2cSetup();
 
-    bcm2835_i2c_write((char *) buffer, 3);
+    uint8_t rc = bcm2835_i2c_write((char *) buffer, 3);
+    if (rc != BCM2835_I2C_REASON_OK) {
+        qDebug() << "Error writing i2c PCA9685" << __PRETTY_FUNCTION__ << rc;
+    }
 }
 
 uint16_t PCA9685::I2cReadReg16(uint8_t reg) {
@@ -411,6 +419,9 @@ void PCA9685::I2cWriteReg(uint8_t reg, uint16_t data, uint16_t data2) {
 
     I2cSetup();
 
-    bcm2835_i2c_write((char *) buffer, 5);
+    uint8_t rc = bcm2835_i2c_write((char *) buffer, 5);
+    if (rc != BCM2835_I2C_REASON_OK) {
+        qDebug() << "Error writing i2c PCA9685" << __PRETTY_FUNCTION__ << rc;
+    }
 }
 

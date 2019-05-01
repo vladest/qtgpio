@@ -38,6 +38,7 @@ private:
 
     QGpio* m_gpio;
     QThread* m_pwmRunner = nullptr;
+    bool m_threadShutdown = false;
 };
 
 #endif // PWMSOFTWARE_H

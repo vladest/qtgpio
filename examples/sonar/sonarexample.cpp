@@ -4,8 +4,8 @@
 
 SonarExample::SonarExample(QObject *parent) : QObject(parent)
 {
-    ultrasound = new HCSR04Sensor(8, 7);
-    connect(ultrasound, &HCSR04Sensor::distanceChanged, this, &SonarExample::onDistanceChanged, Qt::QueuedConnection);
+    ultrasound = new OctoSonarSensor(14);
+    connect(ultrasound, &OctoSonarSensor::distanceChanged, this, &SonarExample::onDistanceChanged, Qt::QueuedConnection);
     ultrasound->start(QThread::NormalPriority);
 }
 

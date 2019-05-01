@@ -1,7 +1,7 @@
 #include "servobase.h"
 #include <QMetaEnum>
 #include <QMap>
-
+#include <QDebug>
 const QMap<ServoBase::KnownServos, ServoBase::ServoParameters > knownServosPulses = {
     { ServoBase::MG90S, { ServoBase::MG90S, 550, 2250, 180.0 } },
     { ServoBase::MG995, { ServoBase::MG995, 500, 2300, 180.0 } },
@@ -33,6 +33,7 @@ void ServoBase::setDuties(uint16_t minDuty, uint16_t maxDuty)
     m_minDuty = minDuty;
     m_maxDuty = maxDuty;
     m_dutyRange = m_maxDuty - m_minDuty;
+    qDebug() << "dutues" << m_minDuty << m_maxDuty;
 }
 
 void ServoBase::setServoPulses(uint16_t minPulse, uint16_t maxPulse)

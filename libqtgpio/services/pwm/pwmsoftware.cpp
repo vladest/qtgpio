@@ -83,6 +83,7 @@ void PwmSoftware::stopPwm(int channel)
 {
     Q_UNUSED(channel)
     if (m_pwmRunner != nullptr) {
+        m_threadShutdown = true;
         m_pwmRunner->requestInterruption();
         m_pwmRunner->wait(m_pwmReqOn + m_pwmReqOff + 10000);
         delete m_pwmRunner;
@@ -95,27 +96,21 @@ void PwmSoftware::pwmThreadRun()
     qDebug() << Q_FUNC_INFO << "thread started for port" << m_pwmPort->getPort() << m_pwmReqOn << m_pwmReqOff;
     quint64 start = 0;
     quint64 end = 0;
-    while (!m_pwmRunner->isInterruptionRequested()) {
-        if (m_pwmDutyCycle.toFloat() > 0.0) {
+    while (!m_threadShutdown) {
+        const float _dutyCycle = m_pwmDutyCycle.toFloat();
+        if (_dutyCycle > 0.0) {
             m_pwmPort->setValue(QGpio::VALUE_HIGH);
-            start = bcm2835_st_read();
-            QThread::usleep(m_pwmReqOn);
-            end = bcm2835_st_read();
-            if ((end - start) <  m_pwmReqOn)
-                bcm2835_delayMicroseconds(end - start);
+            bcm2835_delayMicroseconds(m_pwmReqOn);
         }
 
-        if (m_pwmDutyCycle.toFloat() < 100.0) {
+        if (_dutyCycle < 100.0) {
             m_pwmPort->setValue(QGpio::VALUE_LOW);
-            start = bcm2835_st_read();
-            QThread::usleep(m_pwmReqOff);
-            end = bcm2835_st_read();
-            if ((end - start) <  m_pwmReqOff)
-                bcm2835_delayMicroseconds(end - start);
+            bcm2835_delayMicroseconds(m_pwmReqOff);
         }
     }
 
     // clean up
     m_pwmPort->setValue(QGpio::VALUE_LOW);
+    m_threadShutdown = false;
     qDebug() << Q_FUNC_INFO << "thread stopped for port" << m_pwmPort->getPort();
 }
