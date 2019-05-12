@@ -26,7 +26,7 @@ public:
     float actuactionRange() const;
     void setActuactionRange(float actuactionRange);
 
-    void setDuties(uint16_t minDuty, uint16_t maxDuty);
+    virtual void setDuties(uint16_t minDuty, uint16_t maxDuty);
     uint16_t minDuty() const;
     uint16_t maxDuty() const;
 
@@ -41,7 +41,7 @@ public:
      * need to experiment with specific servo to make sure it will not stuck in an adge position
      * trying to reach out behind its threshold. In this case it will consume power and overheat
      */
-    void setServoPulses(uint16_t minPulse, uint16_t maxPulse);
+    virtual void setServoPulses(uint16_t minPulse, uint16_t maxPulse);
     void setServoPulses(KnownServos servo);
 
     ServoParameters servoPulses(const char *name);

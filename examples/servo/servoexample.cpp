@@ -4,6 +4,7 @@
 
 #include "servo/servosoftware.h"
 #include "servo/servocontrol9685.h"
+#include "servo/servocontrolultraborg.h"
 
 ServoExample::ServoExample(QObject *parent) : QObject(parent)
 {
@@ -12,8 +13,11 @@ ServoExample::ServoExample(QObject *parent) : QObject(parent)
              Qt::QueuedConnection);
     m_consoleReader->start();
 
-    servoPortLeftRight = new ServoControl9685(11);
-    servoPortUpDown = new ServoControl9685(9);
+    servoPortLeftRight = new ServoControlUltraborg(2);
+    servoPortUpDown = new ServoControlUltraborg(3);
+
+//    servoPortLeftRight = new ServoControl9685(11);
+//    servoPortUpDown = new ServoControl9685(9);
     //servoPortUpDown = new ServoSoftware(17);
 
     //MG995
@@ -23,7 +27,7 @@ ServoExample::ServoExample(QObject *parent) : QObject(parent)
     servoPortLeftRight->setServoPulses(550, 2250);
     servoPortUpDown->setServoPulses(550, 2250);
 
-    m_motor = new MotorDriverBoard;
+    //m_motor = new MotorDriverBoard;
 }
 
 ServoExample::~ServoExample()
@@ -33,7 +37,7 @@ ServoExample::~ServoExample()
     delete m_consoleReader;
     delete servoPortUpDown;
     delete servoPortLeftRight;
-    delete m_motor;
+    //delete m_motor;
 }
 
 void ServoExample::onConsoleKeyPressed(int ch)
@@ -52,24 +56,24 @@ void ServoExample::onConsoleKeyPressed(int ch)
                 m_consoleReader->requestInterruption();
                 qApp->exit();
             } else if (ch == 0x41) { //UP
-                if (esc_seq)
-                    m_motor->forward(MotorDriverBoard::BOTH_MOTORS);
+//                if (esc_seq)
+//                    m_motor->forward(MotorDriverBoard::BOTH_MOTORS);
                     //servoPortUpDown->startRotating(-1.0);
             } else if (ch == 0x42) { //DOWN
-                if (esc_seq)
-                    m_motor->reverse(MotorDriverBoard::BOTH_MOTORS);
+//                if (esc_seq)
+//                    m_motor->reverse(MotorDriverBoard::BOTH_MOTORS);
                     //servoPortUpDown->startRotating(1.0);
             } else if (ch == 0x44) { //LEFT
-                if (esc_seq) {
-                    m_motor->stop(MotorDriverBoard::LEFT_MOTOR);
-                    m_motor->forward(MotorDriverBoard::RIGHT_MOTOR);
-                }
+//                if (esc_seq) {
+//                    m_motor->stop(MotorDriverBoard::LEFT_MOTOR);
+//                    m_motor->forward(MotorDriverBoard::RIGHT_MOTOR);
+//                }
                     //servoPortLeftRight->startRotating(-1.0);
             } else if (ch == 0x43) { //RIGHT
-                if (esc_seq) {
-                    m_motor->stop(MotorDriverBoard::RIGHT_MOTOR);
-                    m_motor->forward(MotorDriverBoard::LEFT_MOTOR);
-                }
+//                if (esc_seq) {
+//                    m_motor->stop(MotorDriverBoard::RIGHT_MOTOR);
+//                    m_motor->forward(MotorDriverBoard::LEFT_MOTOR);
+//                }
                     //servoPortLeftRight->startRotating(1.0);
             } else if (ch == 'a') { //LEFT
                 servoPortLeftRight->setAngle(0);
@@ -80,13 +84,13 @@ void ServoExample::onConsoleKeyPressed(int ch)
             } else if (ch == 's') { //RIGHT
                 servoPortUpDown->setAngle(180);
             }  else if (ch == '+') { //LEFT
-                m_motor->setSpeed(m_motor->speedLeft() + 5.0, m_motor->speedRight() + 5.0);
+                //m_motor->setSpeed(m_motor->speedLeft() + 5.0, m_motor->speedRight() + 5.0);
             } else if (ch == '-') { //RIGHT
-                m_motor->setSpeed(m_motor->speedLeft() - 5.0, m_motor->speedRight() - 5.0);
+                //m_motor->setSpeed(m_motor->speedLeft() - 5.0, m_motor->speedRight() - 5.0);
             } else if (ch == 0x20) { //SPACE
                 servoPortLeftRight->stopRotating();
                 servoPortUpDown->stopRotating();
-                m_motor->stop(MotorDriverBoard::BOTH_MOTORS);
+                //m_motor->stop(MotorDriverBoard::BOTH_MOTORS);
             }
 
             esc = esc_seq = false;

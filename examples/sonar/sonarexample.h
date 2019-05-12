@@ -3,6 +3,7 @@
 #include <QObject>
 #include "sensors/hcsr04sensor.h"
 #include "sensors/octosonarsensor.h"
+#include "sensors/ultraborgsensor.h"
 
 class SonarExample : public QObject
 {
@@ -14,6 +15,6 @@ public:
 public slots:
     void onDistanceChanged(float distance);
 private:
-    OctoSonarSensor* ultrasound = nullptr;
+    UltraborgSensor* ultrasound = nullptr;
 };
 

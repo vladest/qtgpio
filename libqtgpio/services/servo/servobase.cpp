@@ -33,7 +33,7 @@ void ServoBase::setDuties(uint16_t minDuty, uint16_t maxDuty)
     m_minDuty = minDuty;
     m_maxDuty = maxDuty;
     m_dutyRange = m_maxDuty - m_minDuty;
-    qDebug() << "dutues" << m_minDuty << m_maxDuty;
+    qDebug() << "duties" << m_minDuty << m_maxDuty;
 }
 
 void ServoBase::setServoPulses(uint16_t minPulse, uint16_t maxPulse)

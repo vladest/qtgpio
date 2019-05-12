@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <string.h>
 #include <sys/time.h>
+#include <signal.h>
 
 #include "qgpio.h"
 #include "qgpioport.h"
@@ -18,6 +19,49 @@
 volatile uint32_t* QGpio::m_gpioMap = bcm2835_gpio;
 QMap<int, QPointer<QGpioPort> > QGpio::m_PortsAllocated;
 QMap<int, QPointer<QGpioPort> > QGpio::m_EventFDsAllocated;
+
+void sigHandler (int sig)
+{
+    qDebug("Exiting on signal %d: %s", sig, strsignal (sig)) ;
+    //  (void)unlink (PIDFILE) ;
+    exit (EXIT_FAILURE) ;
+}
+
+void setupSigHandler (void)
+{
+    struct sigaction action ;
+
+    sigemptyset (&action.sa_mask) ;
+    action.sa_flags = 0 ;
+
+    // Ignore what we can
+
+    action.sa_handler = SIG_IGN ;
+
+
+//    sigaction (SIGTTIN, &action, NULL) ;
+//    sigaction (SIGTTOU, &action, NULL) ;
+
+    // Trap what we can to exit gracefully
+
+    action.sa_handler = sigHandler;
+    sigaction (SIGHUP,  &action, NULL) ;
+
+    sigaction (SIGINT,  &action, NULL) ;
+    //sigaction (SIGQUIT, &action, NULL) ;
+    sigaction (SIGILL,  &action, NULL) ;
+    sigaction (SIGABRT, &action, NULL) ;
+    sigaction (SIGFPE,  &action, NULL) ;
+    sigaction (SIGSEGV, &action, NULL) ;
+    //igaction (SIGPIPE, &action, NULL) ;
+    //sigaction (SIGALRM, &action, NULL) ;
+    sigaction (SIGTERM, &action, NULL) ;
+    //sigaction (SIGUSR1, &action, NULL) ;
+    //sigaction (SIGUSR2, &action, NULL) ;
+    //sigaction (SIGCHLD, &action, NULL) ;
+    //sigaction (SIGTSTP, &action, NULL) ;
+    //sigaction (SIGBUS,  &action, NULL) ;
+}
 
 QGpio* QGpio::getInstance()
 {
@@ -76,7 +120,7 @@ QGpio::QGpio() : QObject(nullptr)
 #if defined(ROBOCORE_ON_DESKTOP)
     bcm2835_set_debug(1);
 #endif
-
+    setupSigHandler();
     qDebug() << m_rpiCpuInfo.boardString();
 }
 
@@ -165,8 +209,8 @@ void QGpio::inputEventThreadFunc() {
                         ts > timenow) {
                     g->setLastCallTimestamp(timenow);
                     emit inputEvent(g);
-//                    event_occurred[g->gpio] = 1;
-//                    run_callbacks(g->gpio);
+                    //                    event_occurred[g->gpio] = 1;
+                    //                    run_callbacks(g->gpio);
                 }
             }
         } else if (epoll_ret == -1) {
