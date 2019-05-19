@@ -11,6 +11,8 @@
 
 #include "qgpio.h"
 #include "qgpioport.h"
+#include "qgpioi2cslave.h"
+
 #include <QMutexLocker>
 #include <QFile>
 #include <QDateTime>
@@ -18,6 +20,7 @@
 
 volatile uint32_t* QGpio::m_gpioMap = bcm2835_gpio;
 QMap<int, QPointer<QGpioPort> > QGpio::m_PortsAllocated;
+QMap<uint8_t, QPointer<QGpioI2CSlave> > QGpio::m_i2cSlavesAllocated;
 QMap<int, QPointer<QGpioPort> > QGpio::m_EventFDsAllocated;
 
 void sigHandler (int sig)
@@ -101,10 +104,7 @@ QPointer<QGpioPort> QGpio::allocateGpioPort(int port, GpioDirection direction, G
 void QGpio::deallocateGpioPort(int port)
 {
     QPointer<QGpioPort> _port = m_PortsAllocated.value(port, nullptr);
-    if (_port != nullptr) {
-        delete _port;
-        m_PortsAllocated.remove(port);
-    }
+    deallocateGpioPort(_port);
 }
 
 void QGpio::deallocateGpioPort(QPointer<QGpioPort> port)
@@ -112,6 +112,39 @@ void QGpio::deallocateGpioPort(QPointer<QGpioPort> port)
     if (!port.isNull()) {
         m_PortsAllocated.remove(port->getPort());
         delete port;
+    }
+}
+
+QPointer<QGpioI2CSlave> QGpio::allocateI2CSlave(uint8_t address, uint16_t clockDivider, uint16_t timeout)
+{
+    QPointer<QGpioI2CSlave> _i2c = m_i2cSlavesAllocated.value(address, nullptr);
+    if (_i2c == nullptr) {
+        _i2c = new QGpioI2CSlave(address, clockDivider, timeout);
+        _i2c->setGpioParent(this);
+        m_i2cSlavesAllocated[address] = _i2c;
+        if (m_i2cSlavesAllocated.size() == 1) {
+            bcm2835_i2c_begin();
+        }
+    } else {
+        qWarning() << "I2C address" << address << "already allocated";
+    }
+    return _i2c;
+}
+
+void QGpio::deallocateI2CSlave(uint8_t address)
+{
+    QPointer<QGpioI2CSlave> _i2c = m_i2cSlavesAllocated.value(address, nullptr);
+    deallocateI2CSlave(_i2c);
+}
+
+void QGpio::deallocateI2CSlave(QPointer<QGpioI2CSlave> i2cSlave)
+{
+    if (!i2cSlave.isNull()) {
+        m_i2cSlavesAllocated.remove(i2cSlave->address());
+        delete i2cSlave;
+        if (m_i2cSlavesAllocated.isEmpty()) {
+            bcm2835_i2c_end();
+        }
     }
 }
 

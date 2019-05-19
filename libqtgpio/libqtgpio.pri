@@ -4,12 +4,13 @@ INCLUDEPATH += $$PWD $$PWD/rpi $$PWD/hats $$PWD/services
 
 SOURCES += \
     $$PWD/qgpio.cpp \
+    $$PWD/qgpioi2cslave.cpp \
     $$PWD/qgpioport.cpp \
     $$PWD/rpi/rpicpuinfo.cpp \
     $$PWD/rpi/bcm2835.c \
     $$PWD/hats/pca9685/pca9685.cpp \
     $$PWD/hats/ultraborg/ultraborg.cpp \
-    $$PWD/hats/ultraborg/i2c.cpp \
+    $$PWD/services/motor/motor_driver_hat.cpp \
     $$PWD/services/pwm/pwmsoftware.cpp \
     $$PWD/services/pwm/pwmpca9685.cpp \
     $$PWD/services/pwm/pwmultraborg.cpp \
@@ -25,12 +26,13 @@ SOURCES += \
 
 HEADERS += \
     $$PWD/qgpio.h \
+    $$PWD/qgpioi2cslave.h \
     $$PWD/qgpioport.h \
     $$PWD/rpi/rpicpuinfo.h \
     $$PWD/rpi/bcm2835.h \
     $$PWD/hats/pca9685/pca9685.h \
-    $$PWD/hats/ultraborg/i2c.h \
     $$PWD/hats/ultraborg/ultraborg.h \
+    $$PWD/services/motor/motor_driver_hat.h \
     $$PWD/services/pwm/pwmsoftware.h \
     $$PWD/services/pwm/pwmpca9685.h \
     $$PWD/services/pwm/pwmultraborg.h \

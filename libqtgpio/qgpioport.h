@@ -39,8 +39,6 @@ public:
     quint64 getLastCallTimestamp() const;
     void setLastCallTimestamp(const quint64 &lastCallTimestamp);
 
-
-
 protected:
 
     QGpioPort(int port, QGpio::GpioDirection direction, QGpio::GpioPullUpDown pud, QObject* parent = nullptr);

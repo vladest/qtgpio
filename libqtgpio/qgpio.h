@@ -11,6 +11,7 @@
 #include "rpi/bcm2835.h"
 
 class QGpioPort;
+class QGpioI2CSlave;
 
 class QGpio: public QObject
 {
@@ -80,6 +81,10 @@ public:
     void deallocateGpioPort(int port);
     void deallocateGpioPort(QPointer<QGpioPort> port);
 
+    QPointer<QGpioI2CSlave> allocateI2CSlave(uint8_t address, uint16_t clockDivider, uint16_t timeout);
+    void deallocateI2CSlave(uint8_t address);
+    void deallocateI2CSlave(QPointer<QGpioI2CSlave> i2cSlave);
+
     /**
      * @brief getGpioMap
      * @return memory mapped address for GPIOs
@@ -115,6 +120,7 @@ signals:
 private:
     static volatile uint32_t* m_gpioMap;
     static QMap<int, QPointer<QGpioPort> > m_PortsAllocated;
+    static QMap<uint8_t, QPointer<QGpioI2CSlave> > m_i2cSlavesAllocated;
     static QMap<int, QPointer<QGpioPort> > m_EventFDsAllocated;
     RpiCpuInfo m_rpiCpuInfo;
     QThread* m_eventsRunner = nullptr;

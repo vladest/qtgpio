@@ -43,19 +43,13 @@ class MotorDriverBoard: public QThread {
 
     Q_OBJECT
 public:
-    enum MotorsEnum {
-        LEFT_MOTOR = 1,
-        RIGHT_MOTOR = 2,
-        BOTH_MOTORS = 3
-    };
-    Q_ENUM(MotorsEnum);
 
     explicit MotorDriverBoard(QObject *parent = nullptr);
     virtual ~MotorDriverBoard();
 
-    void forward(MotorsEnum motors);
-    void stop(MotorsEnum motors);
-    void reverse(MotorsEnum motors);
+    void forward(MotorBase::MotorsEnum motors);
+    void stop(MotorBase::MotorsEnum motors);
+    void reverse(MotorBase::MotorsEnum motors);
     void setSpeed(float speedLeft, float speedRight);
     float speedLeft() const;
     float speedRight() const;

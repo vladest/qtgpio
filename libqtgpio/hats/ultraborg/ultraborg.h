@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <QAtomicInt>
-#include "i2c.h"
+#include "qgpioi2cslave.h"
 
 static const uint8_t UB_DEFAULT_I2C_ADDRESS = 0x36;  // I2C address set by default (before using SET_I2C_ADD)
 
@@ -37,10 +37,8 @@ private:
 
 private:
     Q_DISABLE_COPY(UltraBorg);
-    uint8_t m_nAddress = UB_DEFAULT_I2C_ADDRESS;
-    I2C i2c;
+    QPointer<QGpioI2CSlave> m_i2c;
     volatile bool m_inited = false;
-    static QAtomicInt m_references;
 };
 
 #endif // ULTRABORG_H

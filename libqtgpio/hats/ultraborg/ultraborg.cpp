@@ -1,6 +1,8 @@
 #include <QMutexLocker>
+
 #include "ultraborg.h"
-#include "i2c.h"
+#include "qgpio.h"
+
 #include <QDebug>
 
 //// Constants /////
@@ -9,8 +11,6 @@
 #define UB_DEFAULT_PWM_MAX      (4000)  // Servo maximum limit when set to default
 #define UB_DEFAULT_PWM_MIN      (2000)  // Servo minimum limit when set to default
 #define UB_USM_US_TO_MM         (0.171500)  // Conversion from 'GET_TIME_USM' commands to millimeters
-
-QAtomicInt UltraBorg::m_references = 0;
 
 //// Ultrasonic Commands Mapping ////
 static const uint8_t UbCommandGetTimeUSM[4] = { 1, 2, 3, 4 };
@@ -36,7 +36,6 @@ UltraBorg *UltraBorg::getInstance()
     QMutex mutex;
     QMutexLocker lock(&mutex);  // to unlock mutex on exit
     static UltraBorg instance;
-    m_references.ref();
     return &instance;
 }
 
@@ -49,30 +48,24 @@ UltraBorg::UltraBorg()
 // The value is an integer where 2000 represents a 1 ms servo burst
 UltraBorg::~UltraBorg()
 {
-    if (m_references.load() > 0) {
-        qWarning() << "Ultraborg detroyed but not all allocators called deinit()";
-        if (m_inited) {
-            i2c.deinit();
-            m_inited = false;
-        }
-    }
+    deinit();
 }
 
 void UltraBorg::deinit() {
-    if (!m_references.deref()) {
-        i2c.deinit();
-        m_inited = false;
-    }
+    QGpio::getInstance()->deallocateI2CSlave(m_i2c);
 }
 
 void UltraBorg::init(uint8_t address)
 {
     if (!m_inited) {
-        m_nAddress = address;
-        i2c.init(m_nAddress);
+        QGpio* gpio = QGpio::getInstance();
+        if (gpio->init() == QGpio::INIT_OK) {
+            m_i2c = gpio->allocateI2CSlave(address, BCM2835_I2C_CLOCK_DIVIDER_626, 40000);
+        }
+
         // Read in the limits for this board
-        uint8_t id = i2c.I2CReadReg(0x99);
-        if (id == m_nAddress) {
+        uint8_t id = m_i2c->read(0x99);
+        if (id == address) {
             qDebug().nospace() << "Ultraborg found at 0x" << hex << id;
             for (int i = 0; i < 3; i++) {
                 UbServoMin[i] = getPWMMin(i);
@@ -80,7 +73,7 @@ void UltraBorg::init(uint8_t address)
             }
             m_inited = true;
         } else {
-            qWarning().nospace() << "Error detecting Ultraborg at address: 0x" << hex << m_nAddress;
+            qWarning().nospace() << "Error detecting Ultraborg at address: 0x" << hex << address;
         }
     }
 }
@@ -92,7 +85,7 @@ uint16_t UltraBorg::getPWMMin(int servo)
         return 0;
     }
 
-    return i2c.I2CReadReg16(UbCommandGetPWMMin[servo]);
+    return m_i2c->read16(UbCommandGetPWMMin[servo]);
 }
 
 
@@ -105,7 +98,7 @@ uint16_t UltraBorg::getPWMMax(int servo) {
         qWarning("UltraBord Error:  Please pass servo {0, 1, 2, 3} only.\n");
         return 0;
     }
-    return i2c.I2CReadReg16(UbCommandGetPWMMax[servo]);
+    return m_i2c->read16(UbCommandGetPWMMax[servo]);
 }
 
 
@@ -117,13 +110,13 @@ uint16_t UltraBorg::getPWMValue(int servo) {
         return 0;
     }
 
-    return i2c.I2CReadReg16(UbCommandGetPWM[servo]);
+    return m_i2c->read16(UbCommandGetPWM[servo]);
 
 }
 
 
 uint16_t UltraBorg::getPWMBootValue(int servo) {
-    return i2c.I2CReadReg16(UbCommandGetPWMBoot[servo]);
+    return m_i2c->read16(UbCommandGetPWMBoot[servo]);
 }
 
 // PWM value can be set anywhere from 0 for a 0% duty cycle to 65535 for a 100% duty cycle
@@ -135,7 +128,7 @@ void UltraBorg::setPWMValue(int servo, uint16_t value)
         return;
     }
 
-    i2c.I2CWriteReg(UbCommandSetPWM[servo], value);
+    m_i2c->write(UbCommandSetPWM[servo], value);
 }
 
 uint8_t UltraBorg::repeatedWrite(uint8_t reg, uint8_t checkReg, uint16_t value, int numRepeats, int delayAfterWrite)
@@ -144,9 +137,9 @@ uint8_t UltraBorg::repeatedWrite(uint8_t reg, uint8_t checkReg, uint16_t value, 
     uint16_t checkValue = 0;
     int count = 0;
     do {
-        rc = i2c.I2CWriteReg(reg, value);
-        udelay(delayAfterWrite);// delay after eeprom
-        checkValue = i2c.I2CReadReg16(checkReg);
+        rc = m_i2c->write(reg, value);
+        delayMicroseconds(delayAfterWrite);// delay after eeprom
+        checkValue = m_i2c->read16(checkReg);
         //qDebug() << "writing to" << reg << "val:" << value << "got from reg:" << checkReg << "val:" << checkValue;
     } while (checkValue != value && ++count < numRepeats);
     if (checkValue != value) {
@@ -174,7 +167,7 @@ float UltraBorg::getDistance(int usm) {
         qWarning("UltraBord Error:  Please pass usm {0, 1, 2, 3} only.\n");
         return 0;
     }
-    time_us = i2c.I2CReadReg16(UbCommandGetFilterUSM[usm]);
+    time_us = m_i2c->read16(UbCommandGetFilterUSM[usm]);
     if (time_us == 65535) time_us = 0;
     return (float)time_us * UB_USM_US_TO_MM;
 }
@@ -187,7 +180,7 @@ float UltraBorg::getRawDistance(int usm) {
         return 0;
     }
 
-    time_us = i2c.I2CReadReg16(UbCommandGetTimeUSM[usm]);
+    time_us = m_i2c->read16(UbCommandGetTimeUSM[usm]);
     if (time_us == 65535) time_us = 0;
     return (float)time_us * UB_USM_US_TO_MM;
 }
