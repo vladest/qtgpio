@@ -20,7 +20,7 @@ public:
     uint8_t write(uint8_t reg, uint8_t data);
     uint8_t write(uint8_t reg, uint16_t data);
     uint8_t write(uint8_t reg, uint32_t data);
-
+    uint8_t write(uint8_t reg, uint16_t data, uint16_t data1);
 private:
     void i2cSetup();
 

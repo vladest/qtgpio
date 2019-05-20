@@ -129,6 +129,24 @@ uint8_t QGpioI2CSlave::write(uint8_t reg, uint16_t data) {
     return rc;
 }
 
+uint8_t QGpioI2CSlave::write(uint8_t reg, uint16_t data, uint16_t data1) {
+    uint8_t buffer[5];
+
+    buffer[0] = reg;
+    buffer[1] = (uint8_t) (data & 0xFF);
+    buffer[2] = (uint8_t) (data >> 8);
+    buffer[3] = (uint8_t) (data1 & 0xFF);
+    buffer[4] = (uint8_t) (data1 >> 8);
+
+    i2cSetup();
+
+    uint8_t rc = bcm2835_i2c_write((char *) buffer, 5);
+    if (rc != BCM2835_I2C_REASON_OK) {
+        qDebug() << "Error writing i2c UltraBorg" << __PRETTY_FUNCTION__ << rc;
+    }
+    return rc;
+}
+
 uint8_t QGpioI2CSlave::write(uint8_t reg, uint32_t data) {
     uint8_t buffer[5];
 

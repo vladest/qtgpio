@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "qgpioi2cslave.h"
 
 #define PCA9685_I2C_ADDRESS_DEFAULT	0x40
 #define PCA9685_I2C_ADDRESS_FIXED	0x70
@@ -69,16 +70,5 @@ private:
     void AutoIncrement(bool);
 
 private:
-    void I2cSetup(void);
-
-    void I2cWriteReg(uint8_t, uint8_t);
-    uint8_t I2cReadReg(uint8_t);
-
-    void I2cWriteReg(uint8_t, uint16_t);
-    uint16_t I2cReadReg16(uint8_t);
-
-    void I2cWriteReg(uint8_t, uint16_t, uint16_t);
-
-private:
-    uint8_t m_nAddress;
+    QPointer<QGpioI2CSlave> m_i2c;
 };
