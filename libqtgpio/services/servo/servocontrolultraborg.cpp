@@ -8,6 +8,7 @@ ServoControlUltraborg::ServoControlUltraborg(int channel, uint8_t port, QObject 
 }
 
 ServoControlUltraborg::~ServoControlUltraborg() {
+    saveServoPulses();
 }
 
 void ServoControlUltraborg::stopRotating()
@@ -54,5 +55,11 @@ void ServoControlUltraborg::setServoPulses(uint16_t minPulse, uint16_t maxPulse)
 {
     ServoBase::setServoPulses(minPulse, maxPulse);
     //qDebug() << __PRETTY_FUNCTION__ << minDuty() << minPulse << maxPulse;
-    m_pwmUltraborg->ultraborg()->setPWMLimits(m_channel, minPulse*2, maxPulse*2, minPulse*2);
+}
+
+void ServoControlUltraborg::saveServoPulses()
+{
+    // save last value
+    m_pwmUltraborg->ultraborg()->setPWMLimits(m_channel, servoMinPulse()*2, servoMaxPulse()*2,
+                                              m_pwmUltraborg->ultraborg()->getPWMValue(m_channel));
 }

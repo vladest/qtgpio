@@ -67,9 +67,11 @@ void UltraBorg::init(uint8_t address)
         uint8_t id = m_i2c->read(0x99);
         if (id == address) {
             qDebug().nospace() << "Ultraborg found at 0x" << hex << id;
-            for (int i = 0; i < 3; i++) {
+            qDebug() << "EEPROM values:";
+            for (int i = 0; i < 4; i++) {
                 UbServoMin[i] = getPWMMin(i);
                 UbServoMax[i] = getPWMMax(i);
+                qDebug().nospace() << " Connector " << i << " min: " << UbServoMin[i] << " max: " << UbServoMax[i] <<  " boot: " << getPWMBootValue(i);
             }
             m_inited = true;
         } else {

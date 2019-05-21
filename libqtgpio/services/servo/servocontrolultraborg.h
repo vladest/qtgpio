@@ -18,6 +18,7 @@ public:
     void recalcDuty() override;
     // reimplement
     void setServoPulses(uint16_t minPulse, uint16_t maxPulse) override;
+    void saveServoPulses();
 private:
     QScopedPointer<PwmUltraborg> m_pwmUltraborg;
     int m_channel = -1;
