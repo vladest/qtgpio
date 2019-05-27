@@ -1255,7 +1255,7 @@ uint8_t bcm2835_i2c_read(char* buf, uint32_t len)
     while (!(bcm2835_peri_read_nb(status) & BCM2835_BSC_S_DONE))
     {
         /* we must empty the FIFO as it is populated and not use any delay */
-        while (bcm2835_peri_read_nb(status) & BCM2835_BSC_S_RXD)
+        while (remaining && bcm2835_peri_read_nb(status) & BCM2835_BSC_S_RXD)
         {
             /* Read from FIFO, no barrier */
             buf[i] = bcm2835_peri_read_nb(fifo);

@@ -34,8 +34,8 @@ void QGpioI2CSlave::i2cSetup()
     // sets read timeout
     volatile uint32_t* stimeout = bcm2835_bsc1 + BCM2835_BSC_CLKT / 4;
     bcm2835_peri_write(stimeout, m_timeout);
-
     bcm2835_i2c_setSlaveAddress(m_address);
+    udelay(500);
 }
 
 
@@ -47,9 +47,9 @@ uint8_t QGpioI2CSlave::read(uint8_t reg) {
 
     (void) bcm2835_i2c_write((char *)&data, 1);
     int _counter = 0;
-    udelay(500);
+    udelay(1000);
     while (bcm2835_i2c_read((char *)&buffer, 2) != BCM2835_I2C_REASON_OK && ++_counter < kMaxCount) {
-        udelay(500);
+        udelay(1000);
     };
 
     if (reg != buffer[0]) {
@@ -69,9 +69,9 @@ uint16_t QGpioI2CSlave::read16(uint8_t reg) {
         qWarning() << "Error writing reg" << hex << reg;
     }
     int _counter = 0;
-    udelay(500);
+    udelay(1000);
     while (bcm2835_i2c_read((char *)&buffer, 3) != BCM2835_I2C_REASON_OK && ++_counter < kMaxCount) {
-        udelay(500);
+        udelay(1000);
     };
 
     if (rc != BCM2835_I2C_REASON_OK || reg != buffer[0]) {
@@ -88,9 +88,9 @@ uint32_t QGpioI2CSlave::read32(uint8_t reg) {
 
     (void) bcm2835_i2c_write((char *)&data, 1);
     int _counter = 0;
-    udelay(500);
+    udelay(1000);
     while (bcm2835_i2c_read((char *)&buffer, 5) != BCM2835_I2C_REASON_OK && ++_counter < kMaxCount) {
-        udelay(500);
+        udelay(1000);
     };
     if (reg != buffer[0]) {
         qWarning() << "reading error. wanted:" << reg << "got:" << buffer[0];
@@ -110,6 +110,7 @@ uint8_t QGpioI2CSlave::write(uint8_t reg, uint8_t data) {
     if (rc != BCM2835_I2C_REASON_OK) {
         qDebug() << "Error writing i2c UltraBorg" << __PRETTY_FUNCTION__ << rc;
     }
+    udelay(1000);
     return rc;
 }
 
@@ -126,6 +127,7 @@ uint8_t QGpioI2CSlave::write(uint8_t reg, uint16_t data) {
     if (rc != BCM2835_I2C_REASON_OK) {
         qDebug() << "Error writing i2c UltraBorg" << __PRETTY_FUNCTION__ << reg  << data << rc;
     }
+    udelay(1000);
     return rc;
 }
 
@@ -144,6 +146,7 @@ uint8_t QGpioI2CSlave::write(uint8_t reg, uint16_t data, uint16_t data1) {
     if (rc != BCM2835_I2C_REASON_OK) {
         qDebug() << "Error writing i2c UltraBorg" << __PRETTY_FUNCTION__ << rc;
     }
+    udelay(1000);
     return rc;
 }
 
@@ -162,5 +165,6 @@ uint8_t QGpioI2CSlave::write(uint8_t reg, uint32_t data) {
     if (rc != BCM2835_I2C_REASON_OK) {
         qDebug() << "Error writing i2c UltraBorg" << __PRETTY_FUNCTION__ << rc;
     }
+    udelay(1000);
     return rc;
 }
