@@ -45,15 +45,18 @@ uint8_t QGpioI2CSlave::read(uint8_t reg) {
 
     i2cSetup();
 
-    (void) bcm2835_i2c_write((char *)&data, 1);
+    uint8_t rc = bcm2835_i2c_write((char *)&data, 1);
+    if (rc != BCM2835_I2C_REASON_OK) {
+        qWarning() << "Error writing reg" << hex << reg;
+    }
     int _counter = 0;
     udelay(1000);
-    while (bcm2835_i2c_read((char *)&buffer, 2) != BCM2835_I2C_REASON_OK && ++_counter < kMaxCount) {
+    while ((rc = bcm2835_i2c_read((char *)&buffer, 2)) != BCM2835_I2C_REASON_OK && ++_counter < kMaxCount) {
         udelay(1000);
     };
 
     if (reg != buffer[0]) {
-        qWarning() << "8bit. reading error. wanted:" << reg << "got:" << buffer[0];
+        qWarning() << "8 bit. reading error. rc:" << rc << "wanted:" << hex  << reg << "got:" << hex << buffer << "i2c address" << m_address;
     }
     return buffer[1];
 }
@@ -70,12 +73,12 @@ uint16_t QGpioI2CSlave::read16(uint8_t reg) {
     }
     int _counter = 0;
     udelay(1000);
-    while (bcm2835_i2c_read((char *)&buffer, 3) != BCM2835_I2C_REASON_OK && ++_counter < kMaxCount) {
+    while ((rc = bcm2835_i2c_read((char *)&buffer, 3)) != BCM2835_I2C_REASON_OK && ++_counter < kMaxCount) {
         udelay(1000);
     };
 
     if (rc != BCM2835_I2C_REASON_OK || reg != buffer[0]) {
-        qWarning() << "16bit. reading error. rc:" << rc << "wanted:"<< hex  << reg << "got:" << hex << buffer;
+        qWarning() << "16 bit. reading error. rc:" << rc << "wanted:" << hex  << reg << "got:" << hex << buffer << "i2c address" << m_address;
     }
     return (uint16_t) ((uint16_t) buffer[1] << 8 | (uint16_t) buffer[2]);
 }
@@ -86,14 +89,17 @@ uint32_t QGpioI2CSlave::read32(uint8_t reg) {
 
     i2cSetup();
 
-    (void) bcm2835_i2c_write((char *)&data, 1);
+    uint8_t rc = bcm2835_i2c_write((char *)&data, 1);
+    if (rc != BCM2835_I2C_REASON_OK) {
+        qWarning() << "Error writing reg" << hex << reg;
+    }
     int _counter = 0;
     udelay(1000);
-    while (bcm2835_i2c_read((char *)&buffer, 5) != BCM2835_I2C_REASON_OK && ++_counter < kMaxCount) {
+    while ((rc = bcm2835_i2c_read((char *)&buffer, 5)) != BCM2835_I2C_REASON_OK && ++_counter < kMaxCount) {
         udelay(1000);
     };
     if (reg != buffer[0]) {
-        qWarning() << "reading error. wanted:" << reg << "got:" << buffer[0];
+        qWarning() << "32 bit. reading error. rc:" << rc << "wanted:" << hex  << reg << "got:" << hex << buffer << "i2c address" << m_address;
     }
     return (uint32_t) ((uint32_t) buffer[1] << 24 | (uint32_t) buffer[2] << 16 | (uint32_t) buffer[3] << 8 | (uint32_t) buffer[4]);
 }
@@ -108,7 +114,7 @@ uint8_t QGpioI2CSlave::write(uint8_t reg, uint8_t data) {
 
     uint8_t rc = bcm2835_i2c_write((char *)buffer, 2);
     if (rc != BCM2835_I2C_REASON_OK) {
-        qDebug() << "Error writing i2c UltraBorg" << __PRETTY_FUNCTION__ << rc;
+        qDebug() << "Error writing 8 bit to i2c:" << hex << reg  << data << "rc:" << rc  << "i2c address:" << m_address;
     }
     udelay(1000);
     return rc;
@@ -125,7 +131,7 @@ uint8_t QGpioI2CSlave::write(uint8_t reg, uint16_t data) {
 
     uint8_t rc = bcm2835_i2c_write((char *) buffer, 3);
     if (rc != BCM2835_I2C_REASON_OK) {
-        qDebug() << "Error writing i2c UltraBorg" << __PRETTY_FUNCTION__ << reg  << data << rc;
+        qDebug() << "Error writing 16 bit to i2c:" << hex << reg  << data << "rc:" << rc  << "i2c address:" << m_address;
     }
     udelay(1000);
     return rc;
@@ -144,7 +150,7 @@ uint8_t QGpioI2CSlave::write(uint8_t reg, uint16_t data, uint16_t data1) {
 
     uint8_t rc = bcm2835_i2c_write((char *) buffer, 5);
     if (rc != BCM2835_I2C_REASON_OK) {
-        qDebug() << "Error writing i2c UltraBorg" << __PRETTY_FUNCTION__ << rc;
+        qDebug() << "Error writing 2 x 16 bit to i2c:" << hex << reg  << data << "rc:" << rc  << "i2c address:" << m_address;
     }
     udelay(1000);
     return rc;
@@ -163,7 +169,7 @@ uint8_t QGpioI2CSlave::write(uint8_t reg, uint32_t data) {
 
     uint8_t rc = bcm2835_i2c_write((char *) buffer, 5);
     if (rc != BCM2835_I2C_REASON_OK) {
-        qDebug() << "Error writing i2c UltraBorg" << __PRETTY_FUNCTION__ << rc;
+        qDebug() << "Error writing 32 bits to i2c:" << hex << reg  << data << "rc:" << rc  << "i2c address:" << m_address;
     }
     udelay(1000);
     return rc;

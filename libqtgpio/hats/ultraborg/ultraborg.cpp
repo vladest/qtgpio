@@ -71,7 +71,13 @@ void UltraBorg::init(uint8_t address)
             for (int i = 0; i < 4; i++) {
                 UbServoMin[i] = getPWMMin(i);
                 UbServoMax[i] = getPWMMax(i);
-                qDebug().nospace() << " Connector " << i << " min: " << UbServoMin[i] << " max: " << UbServoMax[i] <<  " boot: " << getPWMBootValue(i);
+                uint16_t bootVal = getPWMBootValue(i);
+                if (bootVal < UbServoMin[i] || bootVal > UbServoMax[i]) {
+                    qDebug().nospace() << " Connector " << i << " changing boot value from " << bootVal << " to " << UbServoMin[i];
+                    bootVal = UbServoMin[i];
+                    setPWMLimits(i, UbServoMin[i], UbServoMax[i], bootVal);
+                }
+                qDebug().nospace() << " Connector " << i << " min: " << UbServoMin[i] << " max: " << UbServoMax[i] <<  " boot: " << bootVal;
             }
             m_inited = true;
         } else {
