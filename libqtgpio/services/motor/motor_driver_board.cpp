@@ -66,25 +66,25 @@ MotorDriverBoard::~MotorDriverBoard()
 
 void MotorDriverBoard::forward(MotorBase::MotorsEnum motors)
 {
-    if (motors == MotorBase::LEFT_MOTOR || motors == MotorBase::BOTH_MOTORS)
+    if (motors == MotorBase::MOTOR_1 || motors == MotorBase::ALL_MOTORS)
         m_motorLeft->forward();
-    if (motors == MotorBase::RIGHT_MOTOR || motors == MotorBase::BOTH_MOTORS)
+    if (motors == MotorBase::MOTOR_2 || motors == MotorBase::ALL_MOTORS)
         m_motorRight->forward();
 }
 
 void MotorDriverBoard::stop(MotorBase::MotorsEnum motors)
 {
-    if (motors == MotorBase::LEFT_MOTOR || motors == MotorBase::BOTH_MOTORS)
+    if (motors == MotorBase::MOTOR_1 || motors == MotorBase::ALL_MOTORS)
         m_motorLeft->stop();
-    if (motors == MotorBase::RIGHT_MOTOR || motors == MotorBase::BOTH_MOTORS)
+    if (motors == MotorBase::MOTOR_2 || motors == MotorBase::ALL_MOTORS)
         m_motorRight->stop();
 }
 
 void MotorDriverBoard::reverse(MotorBase::MotorsEnum motors)
 {
-    if (motors == MotorBase::LEFT_MOTOR || motors == MotorBase::BOTH_MOTORS)
+    if (motors == MotorBase::MOTOR_1 || motors == MotorBase::ALL_MOTORS)
         m_motorLeft->reverse();
-    if (motors == MotorBase::RIGHT_MOTOR || motors == MotorBase::BOTH_MOTORS)
+    if (motors == MotorBase::MOTOR_2 || motors == MotorBase::ALL_MOTORS)
         m_motorRight->reverse();
 }
 

@@ -9,10 +9,13 @@ class MotorBase : public QObject
 
     Q_PROPERTY(float speed READ speed WRITE setSpeed NOTIFY speedChanged)
 public:
-    enum MotorsEnum {
-        LEFT_MOTOR = 1,
-        RIGHT_MOTOR = 2,
-        BOTH_MOTORS = 3
+    enum MotorsEnum : int {
+        MOTOR_NONE = 0,
+        MOTOR_1 = 1,
+        MOTOR_2 = 2,
+        MOTOR_3 = 4,
+        MOTOR_4 = 8,
+        ALL_MOTORS = 0xFF
     };
     Q_ENUM(MotorsEnum);
 

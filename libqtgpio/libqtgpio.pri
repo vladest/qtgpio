@@ -11,6 +11,7 @@ SOURCES += \
     $$PWD/hats/pca9685/pca9685.cpp \
     $$PWD/hats/ultraborg/ultraborg.cpp \
     $$PWD/services/motor/motor_driver_hat.cpp \
+    $$PWD/services/motor/motor_hat_stepper.cpp \
     $$PWD/services/pwm/pwmsoftware.cpp \
     $$PWD/services/pwm/pwmpca9685.cpp \
     $$PWD/services/pwm/pwmultraborg.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     $$PWD/hats/pca9685/pca9685.h \
     $$PWD/hats/ultraborg/ultraborg.h \
     $$PWD/services/motor/motor_driver_hat.h \
+    $$PWD/services/motor/motor_hat_stepper.h \
     $$PWD/services/pwm/pwmsoftware.h \
     $$PWD/services/pwm/pwmpca9685.h \
     $$PWD/services/pwm/pwmultraborg.h \
