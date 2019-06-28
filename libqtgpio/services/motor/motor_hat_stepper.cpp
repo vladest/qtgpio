@@ -124,7 +124,7 @@ void MotorHatStepperPCA9685::setPWMFreq(uint16_t freq)
     writeByte(PRESCALE, prescale); // set the prescaler
     writeByte(MODE1, oldmode);
     bcm2835_delayMicroseconds(5000);
-    writeByte(MODE1, oldmode | 0x80);  //  This sets the MODE1 register to turn on auto increment.
+    writeByte(MODE1, oldmode | 0xa1);  //  This sets the MODE1 register to turn on auto increment.
 }
 
 /**
@@ -138,7 +138,8 @@ void MotorHatStepperPCA9685::setPWMFreq(uint16_t freq)
  */
 void MotorHatStepperPCA9685::setPwmDutyCycle(uint8_t channel, uint16_t pulse)
 {
-    setPWM(channel, 0, pulse * (4096 / 100) - 1);
+    qDebug() << "speed" << channel << pulse;
+    setPWM(channel, 0, pulse * (4096.0 / 100.0) - 1);
 }
 
 
@@ -178,7 +179,7 @@ Motor::Motor(uint8_t address, uint8_t speedChannel, uint8_t inChannel1, uint8_t 
     m_inChannel2(inChannel2)
 {
     m_pca9685.init(address);
-    m_pca9685.setPWMFreq(100);
+    m_pca9685.setPWMFreq(1600);
 
     for (uint8_t i=0; i < 16; i++)
         m_pca9685.setPWM(i, 0, 0);
@@ -195,8 +196,8 @@ void Motor::forward()
 
     qDebug() << "fwd" << m_inChannel1 << m_inChannel2;
     m_pca9685.setPwmDutyCycle(m_speedChannel, speed());
-    m_pca9685.setLevel(m_inChannel1, 0);
-    m_pca9685.setLevel(m_inChannel2, 1);
+    m_pca9685.setLevel(m_inChannel2, 0);
+    m_pca9685.setLevel(m_inChannel1, 1);
 }
 
 void Motor::stop()
@@ -211,9 +212,10 @@ void Motor::reverse()
 {
     m_motorActive = true;
 
+    qDebug() << "backw" << m_inChannel1 << m_inChannel2;
     m_pca9685.setPwmDutyCycle(m_speedChannel, speed());
-    m_pca9685.setLevel(m_inChannel2, 0);
-    m_pca9685.setLevel(m_inChannel1, 1);
+    m_pca9685.setLevel(m_inChannel1, 0);
+    m_pca9685.setLevel(m_inChannel2, 1);
 }
 
 void Motor::setSpeed(float speed) {
@@ -265,13 +267,13 @@ void MotorStepperHat::reverse(MotorBase::MotorsEnum motors)
             m_motors.at(var)->reverse();
         motor_flag = motor_flag << 1;
     }
-
 }
 
 void MotorStepperHat::setSpeed(QList<QPair<MotorBase::MotorsEnum, float>> motors)
 {
     int motor_flag = 0x01;
     for (const QPair<MotorBase::MotorsEnum, float>& _motSpeed : motors) {
+        motor_flag = 0x01;
         for (int var = 0; var < m_motors.size(); ++var) {
             if (_motSpeed.first == motor_flag)
                 m_motors.at(var)->setSpeed(_motSpeed.second);
