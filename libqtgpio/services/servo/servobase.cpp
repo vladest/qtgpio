@@ -5,7 +5,7 @@
 const QMap<ServoBase::KnownServos, ServoBase::ServoParameters > knownServosPulses = {
     { ServoBase::MG90S, { ServoBase::MG90S, 550, 2250, 180.0 } },
     { ServoBase::MG995, { ServoBase::MG995, 500, 2300, 180.0 } },
-    { ServoBase::SG90, { ServoBase::SG90, 500, 2400, 135.0 } },
+    { ServoBase::SG90, { ServoBase::SG90, 500, 2400, 180.0 } },
 };
 
 ServoBase::ServoBase(QObject *parent) : QObject(parent)

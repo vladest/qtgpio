@@ -42,7 +42,7 @@ void ServoControlUltraborg::setAngle(float angle)
     uint16_t pulsesMax = servoMaxPulse() * 2;
     uint16_t pwmDuty = (uint16_t)((fraction * (pulsesMax - pulsesMin)) + pulsesMin);
     //duty_cycle = (duty_cycle + 1) >> 4;
-    //qDebug() << __PRETTY_FUNCTION__ << minDuty() << pwmDuty << angle << fraction << powerOut;
+    //qDebug() << __PRETTY_FUNCTION__ << pulsesMin << pulsesMax << actuactionRange() << pwmDuty << angle << fraction << powerOut;
     m_pwmUltraborg->pwmSetDutyCycle(m_channel, pwmDuty);
 }
 
