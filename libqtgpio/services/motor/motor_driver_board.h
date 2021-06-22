@@ -47,9 +47,9 @@ public:
     explicit MotorDriverBoard(QObject *parent = nullptr);
     virtual ~MotorDriverBoard();
 
-    void forward(MotorBase::MotorsEnum motors);
-    void stop(MotorBase::MotorsEnum motors);
-    void reverse(MotorBase::MotorsEnum motors);
+    void forward(Motors::MotorsEnum motors);
+    void stop(Motors::MotorsEnum motors);
+    void reverse(Motors::MotorsEnum motors);
     void setSpeed(float speedLeft, float speedRight);
     float speedLeft() const;
     float speedRight() const;

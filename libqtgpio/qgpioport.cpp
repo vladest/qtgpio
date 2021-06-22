@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "rpi/bcm2835.h"
-
 #define FSEL_OFFSET                 0   // 0x0000
 #define SET_OFFSET                  7   // 0x001c / 4
 #define CLR_OFFSET                  10  // 0x0028 / 4
@@ -37,9 +35,13 @@ QGpioPort::QGpioPort(int port, QGpio::GpioDirection direction, QGpio::GpioPullUp
 QGpioPort::~QGpioPort()
 {
     //set port to input/pud off
-    m_pud = QGpio::PUD_OFF;
+    m_pud = QGpio::PULL_OFF;
     m_direction = QGpio::DIRECTION_INPUT;
-    setup();
+    if (m_valueFd != -1) {
+        close(m_valueFd);
+        m_valueFd = -1;
+    }
+    gpioUnexport();
 }
 
 void QGpioPort::setGpioParent(QGpio *gpio)
@@ -49,23 +51,23 @@ void QGpioPort::setGpioParent(QGpio *gpio)
 
 void QGpioPort::clearEventDetect()
 {
-    int offset = EVENT_DETECT_OFFSET + (m_port / 32);
-    int shift = (m_port % 32);
+//    int offset = EVENT_DETECT_OFFSET + (m_port / 32);
+//    int shift = (m_port % 32);
 
-    *(m_gpio->getGpioMap() + offset) |= (1 << shift);
-    short_wait();
-    *(m_gpio->getGpioMap() + offset) = 0;
+//    *(m_gpio->getGpioMap() + offset) |= (1 << shift);
+//    short_wait();
+//    *(m_gpio->getGpioMap() + offset) = 0;
 }
 
 int QGpioPort::eventDetected()
 {
     int offset, value, bit;
 
-    offset = EVENT_DETECT_OFFSET + (m_port / 32);
-    bit = (1 << (m_port % 32));
-    value = *(m_gpio->getGpioMap() + offset) & bit;
-    if (value)
-        clearEventDetect();
+//    offset = EVENT_DETECT_OFFSET + (m_port / 32);
+//    bit = (1 << (m_port % 32));
+//    value = *(m_gpio->getGpioMap() + offset) & bit;
+//    if (value)
+//        clearEventDetect();
     return value;
 }
 
@@ -74,10 +76,10 @@ void QGpioPort::setRisingEvent(bool enable)
     int offset = RISING_ED_OFFSET + (m_port / 32);
     int shift = (m_port % 32);
 
-    if (enable)
-        *(m_gpio->getGpioMap() + offset) |= 1 << shift;
-    else
-        *(m_gpio->getGpioMap() + offset) &= ~(1 << shift);
+//    if (enable)
+//        *(m_gpio->getGpioMap() + offset) |= 1 << shift;
+//    else
+//        *(m_gpio->getGpioMap() + offset) &= ~(1 << shift);
     clearEventDetect();
 }
 
@@ -86,12 +88,12 @@ void QGpioPort::setFallingEvent(bool enable)
     int offset = FALLING_ED_OFFSET + (m_port / 32);
     int shift = (m_port % 32);
 
-    if (enable) {
-        *(m_gpio->getGpioMap() + offset) |= (1 << shift);
-        *(m_gpio->getGpioMap() + offset) = (1 << shift);
-    } else {
-        *(m_gpio->getGpioMap() + offset) &= ~(1 << shift);
-    }
+//    if (enable) {
+//        *(m_gpio->getGpioMap() + offset) |= (1 << shift);
+//        *(m_gpio->getGpioMap() + offset) = (1 << shift);
+//    } else {
+//        *(m_gpio->getGpioMap() + offset) &= ~(1 << shift);
+//    }
     clearEventDetect();
 }
 
@@ -100,10 +102,10 @@ void QGpioPort::setHighEvent(bool enable)
     int offset = HIGH_DETECT_OFFSET+ (m_port / 32);
     int shift = (m_port % 32);
 
-    if (enable)
-        *(m_gpio->getGpioMap()+offset) |= (1 << shift);
-    else
-        *(m_gpio->getGpioMap()+offset) &= ~(1 << shift);
+//    if (enable)
+//        *(m_gpio->getGpioMap()+offset) |= (1 << shift);
+//    else
+//        *(m_gpio->getGpioMap()+offset) &= ~(1 << shift);
     clearEventDetect();
 }
 
@@ -112,53 +114,79 @@ void QGpioPort::setLowEvent(bool enable)
     int offset = LOW_DETECT_OFFSET+ (m_port / 32);
     int shift = (m_port % 32);
 
-    if (enable)
-        *(m_gpio->getGpioMap() + offset) |= 1 << shift;
-    else
-        *(m_gpio->getGpioMap() + offset) &= ~(1 << shift);
+//    if (enable)
+//        *(m_gpio->getGpioMap() + offset) |= 1 << shift;
+//    else
+//        *(m_gpio->getGpioMap() + offset) &= ~(1 << shift);
     clearEventDetect();
 }
 
 void QGpioPort::setPullupdn(QGpio::GpioPullUpDown pud)
 {
-    bcm2835_gpio_set_pud(m_port, pud);
+    //bcm2835_gpio_set_pud(m_port, pud);
     m_pud = pud;
 }
 
 void QGpioPort::setup()
 {
-    setPullupdn(m_pud);
-    setDirection(m_direction);
+    if (!gpioExport()) {
+        return;
+    }
+    if (!gpioSetDirection(QGpio::DIRECTION_INPUT)) {
+        gpioUnexport();
+        return;
+    }
+    m_valueFd = openValueFile();
+    if (m_valueFd < 0) {
+        gpioUnexport();
+        qWarning() << "Error opening value file";
+        return;
+    }
 }
 
 void QGpioPort::setDirection(QGpio::GpioDirection direction)
 {
     m_direction = direction;
-    bcm2835_gpio_fsel(m_port, m_direction);
+    if (gpioSetDirection(m_direction) == false) {
+        qWarning() << "Error set direction" << m_direction << "for GPIO" << m_port;
+    }
 }
 
 QGpio::GpioDirection QGpioPort::getDirection()
 {
-    // no such function in original bcm2835 library
-    volatile uint32_t* paddr = m_gpio->getGpioMap() + BCM2835_GPFSEL0/4 + (m_port/10);
-    uint8_t   shift = (m_port % 10) * 3;
-    uint32_t value = bcm2835_peri_read(paddr);
-    value >>= shift;
-    value &= 7;
-    return (QGpio::GpioDirection)value; // 0=input, 1=output, 4=alt0
+    return m_direction;
 }
+
+#define x_write(fd, buf, len) do {                                  \
+size_t x_write_len = (len);                                     \
+    \
+    if ((size_t)write((fd), (buf), x_write_len) != x_write_len) {   \
+        close(fd);                                                  \
+        return (-1);                                                \
+}                                                               \
+} while (/* CONSTCOND */ 0)
 
 void QGpioPort::setValue(QGpio::GpioValue value)
 {
-    if (value == QGpio::VALUE_HIGH) // value == HIGH
-        bcm2835_gpio_set(m_port);
-    else
-        bcm2835_gpio_clr(m_port);
+    char str_value[2];
+    int len = snprintf(str_value, sizeof(str_value), "%s", value == QGpio::VALUE_HIGH ? "1" : "0");
+    if (write(m_valueFd, str_value, len) != len) {
+        qWarning() << "Error writing value" << value << "to port" << m_port;
+    }
 }
 
 QGpio::GpioValue QGpioPort::value()
 {
-    return (QGpio::GpioValue)bcm2835_gpio_lev(m_port);
+    QGpio::GpioValue value = QGpio::VALUE_LOW;
+    char str_value[2];
+    if (read(m_valueFd, str_value, 1) != 1) {
+        qWarning() << "Error reading value from port" << m_port;
+    } else {
+        if (strncmp(str_value, "1", 1) == 0) {
+            value = QGpio::VALUE_HIGH;
+        }
+    }
+    return value;
 }
 
 
@@ -177,33 +205,12 @@ void QGpioPort::removeEdgeDetect()
 
 bool QGpioPort::addEdgeDetect(QGpio::GpioEdge edge, int bouncetime)
 {
-    if (!gpioExport())
-        return false;
-    if (!gpioSetDirection(QGpio::DIRECTION_INPUT)) {
-        gpioUnexport();
-        return false;
-    }
-    m_valueFd = openValueFile();
-    if (m_valueFd < 0) {
-        gpioUnexport();
-        qWarning() << "Error opening value file";
-        return false;
-    }
     gpioSetEdge(edge);
     m_edge = edge;
     m_bouncetime = bouncetime;
 
     return true;
 }
-
-#define x_write(fd, buf, len) do {                                  \
-    size_t x_write_len = (len);                                     \
-    \
-    if ((size_t)write((fd), (buf), x_write_len) != x_write_len) {   \
-    close(fd);                                                  \
-    return (-1);                                                \
-    }                                                               \
-    } while (/* CONSTCOND */ 0)
 
 bool QGpioPort::gpioExport()
 {

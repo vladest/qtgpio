@@ -1,11 +1,13 @@
 #include "octosonarsensor.h"
 #include "qgpio.h"
+#include <unistd.h>
 #include <QDebug>
 
 const static float MAX_DISTANCE = 400;
 const static float DIST_SCALE = 58.0;
 const static float TRAVEL_TIME_MAX = MAX_DISTANCE * DIST_SCALE;
 
+//TODO: rewrite with QtGpio i2c interface
 OctoSonarSensor::OctoSonarSensor(int interruptPort, uint8_t i2cPort, QObject *parent) : QThread(parent)
 {
     if (QGpio::getInstance()->init() == QGpio::INIT_OK) {
@@ -14,14 +16,13 @@ OctoSonarSensor::OctoSonarSensor(int interruptPort, uint8_t i2cPort, QObject *pa
         qWarning() << "Error initing QGpio";
     }
     m_nAddress = i2cPort;
-    bcm2835_i2c_begin();     //Start I2C operations.
-    i2csetup();
-
+//    bcm2835_i2c_begin();     //Start I2C operations.
+//    i2csetup();
 }
 
 void OctoSonarSensor::i2csetup(void) {
-    bcm2835_i2c_setSlaveAddress(m_nAddress);
-    bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_626);
+//    bcm2835_i2c_setSlaveAddress(m_nAddress);
+//    bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_626);
     //bcm2835_i2c_set_baudrate(10000); //1M baudrate
 }
 
@@ -33,15 +34,15 @@ void OctoSonarSensor::i2cwrite(uint16_t data) {
 
     i2csetup();
 
-    if (bcm2835_i2c_write((char *) buffer, 2) != BCM2835_I2C_REASON_OK)
-        qDebug() << "error writing to i2c";
+//    if (bcm2835_i2c_write((char *) buffer, 2) != BCM2835_I2C_REASON_OK)
+//        qDebug() << "error writing to i2c";
 }
 
 OctoSonarSensor::~OctoSonarSensor()
 {
     stop();
-    bcm2835_i2c_end();
-    bcm2835_close();
+//    bcm2835_i2c_end();
+//    bcm2835_close();
     QGpio::getInstance()->deallocateGpioPort(m_interruptPort);
 }
 
@@ -59,6 +60,7 @@ void OctoSonarSensor::stop()
 
 void OctoSonarSensor::run()
 {
+    QElapsedTimer timer;
     uint16_t data = 0xffff;
     i2cwrite(data);
 
@@ -90,7 +92,7 @@ void OctoSonarSensor::run()
 
         if (bail == 0) {
             qDebug() << "bail out" << m_interruptPort->value();
-            delayMicroseconds(m_delay);
+            usleep(m_delay);
             continue;
         } else {
             qDebug() << "HIGH";
@@ -99,10 +101,10 @@ void OctoSonarSensor::run()
         // pulse is appearing to take too long. Note:
         // error case of never going LOW results in
         // MAX reading :/
-        uint64_t startTime = bcm2835_st_read();
+        timer.restart();
         uint64_t travelTime = 0;
         while(m_interruptPort->value() == QGpio::VALUE_HIGH) {
-            travelTime = bcm2835_st_read() - startTime;
+            travelTime = timer.nsecsElapsed()/1000;
             if (travelTime > TRAVEL_TIME_MAX) {
                 break;
             }
@@ -121,7 +123,7 @@ void OctoSonarSensor::run()
         }
     }
 
-    delayMicroseconds(m_delay);
+    usleep(m_delay);
 }
 
 

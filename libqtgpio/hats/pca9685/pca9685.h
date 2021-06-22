@@ -29,7 +29,7 @@ enum TPCA9685Och {
 
 class PCA9685 {
 public:
-    PCA9685(uint8_t nAddress = PCA9685_I2C_ADDRESS_DEFAULT);
+    PCA9685(uint8_t i2cBus, uint8_t nAddress = PCA9685_I2C_ADDRESS_DEFAULT);
     ~PCA9685(void);
 
     void SetPreScaller(uint8_t);

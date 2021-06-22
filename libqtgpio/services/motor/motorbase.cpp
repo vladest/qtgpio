@@ -17,3 +17,13 @@ float MotorBase::speed() const
 {
     return m_speed;
 }
+
+Motors::MotorsEnum MotorBase::motor() const
+{
+    return m_motor;
+}
+
+void MotorBase::setMotor(Motors::MotorsEnum newMotor)
+{
+    m_motor = newMotor;
+}

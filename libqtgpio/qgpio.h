@@ -1,14 +1,11 @@
 #ifndef QGPIO_H
 #define QGPIO_H
-/*
- * Based on Rpi.GPIO
-*/
 
 #include <QObject>
 #include <QPointer>
 #include <QMap>
-#include "rpi/rpicpuinfo.h"
-#include "rpi/bcm2835.h"
+//#include "rpi/rpicpuinfo.h"
+//#include "rpi/bcm2835.h"
 
 class QGpioPort;
 class QGpioI2CSlave;
@@ -28,14 +25,8 @@ public:
     };
 
     enum GpioDirection {
-        DIRECTION_INPUT = BCM2835_GPIO_FSEL_INPT, // is really 0 for control register!
-        DIRECTION_OUTPUT = BCM2835_GPIO_FSEL_OUTP, // is really 1 for control register!
-        DIRECTION_ALT0 = BCM2835_GPIO_FSEL_ALT0,   /*!< Alternate function 0 0b100 */
-        DIRECTION_ALT1 = BCM2835_GPIO_FSEL_ALT1,   /*!< Alternate function 1 0b101 */
-        DIRECTION_ALT2 = BCM2835_GPIO_FSEL_ALT2,   /*!< Alternate function 2 0b110, */
-        DIRECTION_ALT3 = BCM2835_GPIO_FSEL_ALT3,   /*!< Alternate function 3 0b111 */
-        DIRECTION_ALT4 = BCM2835_GPIO_FSEL_ALT4,   /*!< Alternate function 4 0b011 */
-        DIRECTION_ALT5 = BCM2835_GPIO_FSEL_ALT5
+        DIRECTION_INPUT = 0,
+        DIRECTION_OUTPUT = 1,
     };
 
     enum GpioValue {
@@ -44,9 +35,10 @@ public:
     };
 
     enum GpioPullUpDown {
-        PUD_OFF  = BCM2835_GPIO_PUD_OFF,
-        PUD_DOWN = BCM2835_GPIO_PUD_DOWN,
-        PUD_UP = BCM2835_GPIO_PUD_UP
+        PULL_OFF = -1,
+        PULL_UP = 0,
+        PULL_DOWN = 1,
+
     };
 
     enum GpioEdge {
@@ -77,11 +69,11 @@ public:
      * @param pud
      * @return pointer to QGpioPort
      */
-    QPointer<QGpioPort> allocateGpioPort(int port, GpioDirection direction, GpioPullUpDown pud = PUD_OFF);
+    QPointer<QGpioPort> allocateGpioPort(int port, GpioDirection direction, GpioPullUpDown pud = PULL_OFF);
     void deallocateGpioPort(int port);
     void deallocateGpioPort(QPointer<QGpioPort> port);
 
-    QPointer<QGpioI2CSlave> allocateI2CSlave(uint8_t address, uint16_t clockDivider, uint16_t timeout);
+    QPointer<QGpioI2CSlave> allocateI2CSlave(uint8_t address, uint8_t delay, uint8_t busNum, uint16_t timeout);
     void deallocateI2CSlave(uint8_t address);
     void deallocateI2CSlave(QPointer<QGpioI2CSlave> i2cSlave);
 
@@ -89,7 +81,7 @@ public:
      * @brief getGpioMap
      * @return memory mapped address for GPIOs
      */
-    uint32_t *getGpioMap();
+    //uint32_t *getGpioMap();
 private:
     QGpio();
     virtual ~QGpio();
@@ -122,7 +114,7 @@ private:
     static QMap<int, QPointer<QGpioPort> > m_PortsAllocated;
     static QMap<uint8_t, QPointer<QGpioI2CSlave> > m_i2cSlavesAllocated;
     static QMap<int, QPointer<QGpioPort> > m_EventFDsAllocated;
-    RpiCpuInfo m_rpiCpuInfo;
+    //RpiCpuInfo m_rpiCpuInfo;
     QThread* m_eventsRunner = nullptr;
     int m_epollFd = -1;
 };

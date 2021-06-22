@@ -20,7 +20,7 @@ class MotorHatStepperPCA9685
 public:
 
     MotorHatStepperPCA9685();
-    void init(uint8_t address);
+    void init(uint8_t bus, uint8_t address, uint8_t delay = 1);
 
     void setPWM(uint8_t channel, uint16_t on, uint16_t off);
     void setPWM(uint8_t channel, uint16_t value);

@@ -1,4 +1,5 @@
 #include "pwmsoftware.h"
+#include <unistd.h>
 #include "qgpio.h"
 
 #include <QDebug>
@@ -100,12 +101,12 @@ void PwmSoftware::pwmThreadRun()
         const float _dutyCycle = m_pwmDutyCycle.toFloat();
         if (_dutyCycle > 0.0) {
             m_pwmPort->setValue(QGpio::VALUE_HIGH);
-            bcm2835_delayMicroseconds(m_pwmReqOn);
+            usleep(m_pwmReqOn);
         }
 
         if (_dutyCycle < 100.0) {
             m_pwmPort->setValue(QGpio::VALUE_LOW);
-            bcm2835_delayMicroseconds(m_pwmReqOff);
+            usleep(m_pwmReqOff);
         }
     }
 

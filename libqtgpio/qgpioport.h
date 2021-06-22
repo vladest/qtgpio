@@ -63,7 +63,7 @@ private:
 private:
     int m_port = 0;
     QGpio::GpioDirection m_direction = QGpio::DIRECTION_INPUT;
-    QGpio::GpioPullUpDown m_pud = QGpio::PUD_OFF;
+    QGpio::GpioPullUpDown m_pud = QGpio::PULL_OFF;
     QPointer<QGpio> m_gpio;
 
     int m_valueFd = -1;
