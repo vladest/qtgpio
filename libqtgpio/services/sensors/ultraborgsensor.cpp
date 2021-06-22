@@ -35,10 +35,10 @@ void UltraborgSensor::run()
     while (!isInterruptionRequested()) {
         m_distance = m_ultraborg->getRawDistance(m_sensor);
         emit distanceChanged(m_distance);
-        delayMicroseconds(m_delay);
+        usleep(m_delay);
     }
 
-    delayMicroseconds(m_delay);
+    usleep(m_delay);
 }
 
 

@@ -16,9 +16,10 @@
 #include <QMutexLocker>
 #include <QFile>
 #include <QDateTime>
+#include <QThread>
 #include <QDebug>
 
-volatile uint32_t* QGpio::m_gpioMap = bcm2835_gpio;
+//volatile uint32_t* QGpio::m_gpioMap = bcm2835_gpio;
 QMap<int, QPointer<QGpioPort> > QGpio::m_PortsAllocated;
 QMap<uint8_t, QPointer<QGpioI2CSlave> > QGpio::m_i2cSlavesAllocated;
 QMap<int, QPointer<QGpioPort> > QGpio::m_EventFDsAllocated;
@@ -76,16 +77,17 @@ QGpio* QGpio::getInstance()
 
 QGpio::InitResult QGpio::init() const
 {
-    if (bcm2835_peripherals != MAP_FAILED || bcm2835_init() == 1) {
-        m_gpioMap = bcm2835_gpio;
-        return INIT_OK;
-    }
-    return INIT_MMAP_FAIL;
+//    if (bcm2835_peripherals != MAP_FAILED || bcm2835_init() == 1) {
+//        m_gpioMap = bcm2835_gpio;
+//        return INIT_OK;
+//    }
+//    return INIT_MMAP_FAIL;
+    return INIT_OK;
 }
 
 void QGpio::deinit()
 {
-    bcm2835_close();
+    //bcm2835_close();
 }
 
 QPointer<QGpioPort> QGpio::allocateGpioPort(int port, GpioDirection direction, GpioPullUpDown pud)
@@ -115,17 +117,17 @@ void QGpio::deallocateGpioPort(QPointer<QGpioPort> port)
     }
 }
 
-QPointer<QGpioI2CSlave> QGpio::allocateI2CSlave(uint8_t address, uint16_t clockDivider, uint16_t timeout)
+QPointer<QGpioI2CSlave> QGpio::allocateI2CSlave(uint8_t address, uint8_t delay, uint8_t busNum, uint16_t timeout)
 {
     QPointer<QGpioI2CSlave> _i2c = m_i2cSlavesAllocated.value(address, nullptr);
     if (_i2c == nullptr) {
-        _i2c = new QGpioI2CSlave(address, clockDivider, timeout);
+        _i2c = new QGpioI2CSlave(address, delay, busNum, timeout);
         _i2c->setGpioParent(this);
         m_i2cSlavesAllocated[address] = _i2c;
         if (m_i2cSlavesAllocated.size() == 1) {
-            int rc = bcm2835_i2c_begin();
-            uint8_t read0 = _i2c->read(0x00);
-            qWarning() << "i2c begin" << rc << read0;
+            //int rc = bcm2835_i2c_begin();
+            uint8_t read0 = _i2c->i2cRead(0x00);
+            qWarning() << "i2c begin" << read0;
         }
     } else {
         qWarning() << "I2C address" << address << "already allocated";
@@ -145,7 +147,7 @@ void QGpio::deallocateI2CSlave(QPointer<QGpioI2CSlave> i2cSlave)
         m_i2cSlavesAllocated.remove(i2cSlave->address());
         delete i2cSlave;
         if (m_i2cSlavesAllocated.isEmpty()) {
-            bcm2835_i2c_end();
+            //bcm2835_i2c_end();
         }
     }
 }
@@ -156,7 +158,7 @@ QGpio::QGpio() : QObject(nullptr)
     bcm2835_set_debug(1);
 #endif
     setupSigHandler();
-    qDebug() << m_rpiCpuInfo.boardString();
+    //qDebug() << m_rpiCpuInfo.boardString();
 }
 
 QGpio::~QGpio()
@@ -261,7 +263,7 @@ void QGpio::inputEventThreadFunc() {
     qDebug() << Q_FUNC_INFO << " thread stopped";
 }
 
-uint32_t *QGpio::getGpioMap()
-{
-    return (uint32_t *)m_gpioMap;
-}
+//uint32_t *QGpio::getGpioMap()
+//{
+//    return (uint32_t *)m_gpioMap;
+//}

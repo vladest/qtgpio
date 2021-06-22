@@ -59,14 +59,15 @@ enum TPCA9685Mode2 {
     PCA9685_MODE2_INVRT = 1 << 4
 };
 
-PCA9685::PCA9685(uint8_t nAddress) /*: m_nAddress(nAddress) */{
+PCA9685::PCA9685(uint8_t i2cBus, uint8_t nAddress) /*: m_nAddress(nAddress) */{
     QGpio* gpio = QGpio::getInstance();
     if (gpio->init() != QGpio::INIT_OK) {
         printf("Error init QGpio\n");
         return;
     }
 
-    m_i2c = gpio->allocateI2CSlave(nAddress, BCM2835_I2C_CLOCK_DIVIDER_626, 40000);
+    //TODO: setup i2c bus number
+    m_i2c = gpio->allocateI2CSlave(nAddress, 1, i2cBus, 40000);
 
     AutoIncrement(true);
 
@@ -81,7 +82,7 @@ PCA9685::~PCA9685(void) {
 }
 
 void PCA9685::Sleep(bool bMode) {
-    uint8_t Data = m_i2c->read(PCA9685_REG_MODE1);
+    uint8_t Data = m_i2c->i2cRead(PCA9685_REG_MODE1);
 
     Data &= ~PCA9685_MODE1_SLEEP;
 
@@ -89,7 +90,7 @@ void PCA9685::Sleep(bool bMode) {
         Data |= PCA9685_MODE1_SLEEP;
     }
 
-    m_i2c->write(PCA9685_REG_MODE1, Data);
+    m_i2c->i2cWrite(PCA9685_REG_MODE1, Data);
 
     if (Data & ~PCA9685_MODE1_RESTART) {
         udelay(500);
@@ -101,12 +102,12 @@ void PCA9685::SetPreScaller(uint8_t nPrescale) {
     nPrescale = nPrescale < PCA9685_PRE_SCALE_MIN ? PCA9685_PRE_SCALE_MIN : nPrescale;
 
     Sleep(true);
-    m_i2c->write(PCA9685_REG_PRE_SCALE, nPrescale);
+    m_i2c->i2cWrite(PCA9685_REG_PRE_SCALE, nPrescale);
     Sleep(false);
 }
 
 uint8_t PCA9685::GetPreScaller(void) {
-    return m_i2c->read(PCA9685_REG_PRE_SCALE);
+    return m_i2c->i2cRead(PCA9685_REG_PRE_SCALE);
 }
 
 void PCA9685::SetFrequency(uint16_t nFreq) {
@@ -118,7 +119,7 @@ uint16_t PCA9685::GetFrequency(void) {
 }
 
 void PCA9685::SetOCH(TPCA9685Och enumTPCA9685Och) {
-    uint8_t Data = m_i2c->read(PCA9685_REG_MODE2);
+    uint8_t Data = m_i2c->i2cRead(PCA9685_REG_MODE2);
 
     Data &= ~PCA9685_MODE2_OCH;
 
@@ -126,17 +127,17 @@ void PCA9685::SetOCH(TPCA9685Och enumTPCA9685Och) {
         Data |= PCA9685_OCH_ACK;
     } // else, default Outputs change on STOP command
 
-    m_i2c->write(PCA9685_REG_MODE2, Data);
+    m_i2c->i2cWrite(PCA9685_REG_MODE2, Data);
 }
 
 TPCA9685Och PCA9685::GetOCH(void) {
-    const uint8_t Data = m_i2c->read(PCA9685_REG_MODE2) & PCA9685_MODE2_OCH;
+    const uint8_t Data = m_i2c->i2cRead(PCA9685_REG_MODE2) & PCA9685_MODE2_OCH;
 
     return (TPCA9685Och) Data;
 }
 
 void PCA9685::SetInvert(bool bInvert) {
-    uint8_t Data = m_i2c->read(PCA9685_REG_MODE2);
+    uint8_t Data = m_i2c->i2cRead(PCA9685_REG_MODE2);
 
     Data &= ~PCA9685_MODE2_INVRT;
 
@@ -144,17 +145,17 @@ void PCA9685::SetInvert(bool bInvert) {
         Data |= PCA9685_MODE2_INVRT;
     }
 
-    m_i2c->write(PCA9685_REG_MODE2, Data);
+    m_i2c->i2cWrite(PCA9685_REG_MODE2, Data);
 }
 
 bool PCA9685::GetInvert(void) {
-    const uint8_t Data = m_i2c->read(PCA9685_REG_MODE2) & PCA9685_MODE2_INVRT;
+    const uint8_t Data = m_i2c->i2cRead(PCA9685_REG_MODE2) & PCA9685_MODE2_INVRT;
 
     return (Data == PCA9685_MODE2_INVRT);
 }
 
 void PCA9685::SetOutDriver(bool bOutDriver) {
-    uint8_t Data = m_i2c->read(PCA9685_REG_MODE2);
+    uint8_t Data = m_i2c->i2cRead(PCA9685_REG_MODE2);
 
     Data &= ~PCA9685_MODE2_OUTDRV;
 
@@ -162,11 +163,11 @@ void PCA9685::SetOutDriver(bool bOutDriver) {
         Data |= PCA9685_MODE2_OUTDRV;
     }
 
-    m_i2c->write(PCA9685_REG_MODE2, Data);
+    m_i2c->i2cWrite(PCA9685_REG_MODE2, Data);
 }
 
 bool PCA9685::GetOutDriver(void) {
-    const uint8_t Data = m_i2c->read(PCA9685_REG_MODE2) & PCA9685_MODE2_OUTDRV;
+    const uint8_t Data = m_i2c->i2cRead(PCA9685_REG_MODE2) & PCA9685_MODE2_OUTDRV;
 
     return (Data == PCA9685_MODE2_OUTDRV);
 }
@@ -180,7 +181,7 @@ void PCA9685::Write(uint8_t nChannel, uint16_t nOn, uint16_t nOff) {
         reg = PCA9685_REG_ALL_LED_ON_L;
     }
 
-    m_i2c->write(reg, nOn, nOff);
+    m_i2c->i2cWrite(reg, nOn, nOff);
 }
 
 void PCA9685::Write(uint8_t nChannel, uint16_t nValue) {
@@ -208,11 +209,11 @@ void PCA9685::Read(uint8_t nChannel, uint16_t *pOn, uint16_t *pOff) {
     }
 
     if (pOn != 0) {
-        *pOn = m_i2c->read16(reg);
+        *pOn = m_i2c->i2cRead16(reg);
     }
 
     if (pOff) {
-        *pOff = m_i2c->read16(reg + 2);
+        *pOff = m_i2c->i2cRead16(reg + 2);
     }
 }
 
@@ -229,11 +230,11 @@ void PCA9685::SetFullOn(uint8_t nChannel, bool bMode) {
         reg = PCA9685_REG_ALL_LED_ON_H;
     }
 
-    uint8_t Data = m_i2c->read(reg);
+    uint8_t Data = m_i2c->i2cRead(reg);
 
     Data = bMode ? (Data | 0x10) : (Data & 0xEF);
 
-    m_i2c->write(reg, Data);
+    m_i2c->i2cWrite(reg, Data);
 
     if (bMode) {
         SetFullOff(nChannel, false);
@@ -250,11 +251,11 @@ void PCA9685::SetFullOff(uint8_t nChannel, bool bMode) {
         reg = PCA9685_REG_ALL_LED_OFF_H;
     }
 
-    uint8_t Data = m_i2c->read(reg);
+    uint8_t Data = m_i2c->i2cRead(reg);
 
     Data = bMode ? (Data | 0x10) : (Data & 0xEF);
 
-    m_i2c->write(reg, Data);
+    m_i2c->i2cWrite(reg, Data);
 }
 
 uint8_t PCA9685::CalcPresScale(uint16_t nFreq) {
@@ -289,7 +290,7 @@ uint16_t PCA9685::CalcFrequency(uint8_t nPreScale) {
 }
 
 void PCA9685::Dump(void) {
-    uint8_t reg = m_i2c->read(PCA9685_REG_MODE1);
+    uint8_t reg = m_i2c->i2cRead(PCA9685_REG_MODE1);
 
     printf("MODE1 - Mode register 1 (address 00h) : %02Xh\n", reg);
     printf("\tbit 7 - RESTART : Restart %s\n", reg & PCA9685_MODE1_RESTART ? "enabled" : "disabled");
@@ -301,7 +302,7 @@ void PCA9685::Dump(void) {
     printf("\tbit 1 - SUB1    : PCA9685 %s to I2C-bus subaddress 3\n", reg & PCA9685_MODE1_SUB3 ? "responds" : "does not respond");
     printf("\tbit 0 - ALLCALL : PCA9685 %s to LED All Call I2C-bus address\n", reg & PCA9685_MODE1_ALLCALL ? "responds" : "does not respond");
 
-    reg = m_i2c->read(PCA9685_REG_MODE2);
+    reg = m_i2c->i2cRead(PCA9685_REG_MODE2);
 
     printf("\nMODE2 - Mode register 2 (address 01h) : %02Xh\n", reg);
     printf("\tbit 7 to 5      : Reserved\n");
@@ -310,7 +311,7 @@ void PCA9685::Dump(void) {
     printf("\tbit 2 - OUTDRV  : The 16 LEDn outputs are configured with %s structure\n", reg & PCA9685_MODE2_OUTDRV ? "a totem pole" : "an open-drain");
     printf("\tbit 10- OUTNE   : %01x\n", reg & 0x3);
 
-    reg = m_i2c->read(PCA9685_REG_PRE_SCALE);
+    reg = m_i2c->i2cRead(PCA9685_REG_PRE_SCALE);
 
     printf("\nPRE_SCALE register (address FEh) : %02Xh\n", reg);
     printf("\t Frequency : %d Hz\n", CalcFrequency(reg));
@@ -334,7 +335,7 @@ void PCA9685::Dump(void) {
 }
 
 void PCA9685::AutoIncrement(bool bMode) {
-    uint8_t Data = m_i2c->read(PCA9685_REG_MODE1);
+    uint8_t Data = m_i2c->i2cRead(PCA9685_REG_MODE1);
 
     Data &= ~PCA9685_MODE1_AI;	// 0 Register Auto-Increment disabled. {default}
 
@@ -342,6 +343,6 @@ void PCA9685::AutoIncrement(bool bMode) {
         Data |= PCA9685_MODE1_AI;	// 1 Register Auto-Increment enabled.
     }
 
-    m_i2c->write(PCA9685_REG_MODE1, Data);
+    m_i2c->i2cWrite(PCA9685_REG_MODE1, Data);
 }
 

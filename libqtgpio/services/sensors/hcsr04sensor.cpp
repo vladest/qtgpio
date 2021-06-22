@@ -1,4 +1,6 @@
 #include "hcsr04sensor.h"
+#include <unistd.h>
+#include <QDateTime>
 #include "qgpio.h"
 #include <QDebug>
 
@@ -12,7 +14,7 @@ HCSR04Sensor::HCSR04Sensor(int echoPort, int triggerPort, QObject *parent) : QTh
         m_triggerPort = QGpio::getInstance()->allocateGpioPort(triggerPort, QGpio::DIRECTION_OUTPUT);
         m_echoPort = QGpio::getInstance()->allocateGpioPort(echoPort, QGpio::DIRECTION_INPUT);
         m_triggerPort->setValue(QGpio::VALUE_LOW);
-        delay(500);
+        usleep(500);
     }
 }
 
@@ -37,11 +39,13 @@ void HCSR04Sensor::stop()
 
 void HCSR04Sensor::run()
 {
+    QElapsedTimer timer;
+
     while (!isInterruptionRequested()) {
 
         // Send trig pulse
         m_triggerPort->setValue(QGpio::VALUE_HIGH);
-        delayMicroseconds(20);
+        usleep(20);
         m_triggerPort->setValue(QGpio::VALUE_LOW);
 
         // Wait for echo. Very rarely (2 of 12K at 20Hz)
@@ -55,17 +59,17 @@ void HCSR04Sensor::run()
         }
 
         if (bail == 0) {
-            delayMicroseconds(m_delay);
+            usleep(m_delay);
             continue;
         }
         // Measure time for echo. Return early if the
         // pulse is appearing to take too long. Note:
         // error case of never going LOW results in
         // MAX reading :/
-        uint64_t startTime = bcm2835_st_read();
+        timer.restart();
         uint64_t travelTime = 0;
         while(m_echoPort->value() == QGpio::VALUE_HIGH) {
-            travelTime = bcm2835_st_read() - startTime;
+            travelTime = timer.nsecsElapsed()/1000;
             if (travelTime > TRAVEL_TIME_MAX) {
                 break;
             }
@@ -80,7 +84,7 @@ void HCSR04Sensor::run()
             }
         }
 
-        delayMicroseconds(m_delay);
+        usleep(m_delay);
     }
 }
 
