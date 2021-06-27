@@ -168,8 +168,8 @@ void PCA9685Bboard::setPwmDutyCycle(uint8_t channel, uint16_t pulse)
 void PCA9685Bboard::setLevel(uint8_t channel, uint16_t value)
 {
     if (value == 1) {
-        setPWM(channel, 4096, 0);
-        //setPWM(channel, 0, 4095);
+        //setPWM(channel, 4096, 0);
+        setPWM(channel, 0, 4095);
     } else {
         setPWM(channel, 0, 0);
     }

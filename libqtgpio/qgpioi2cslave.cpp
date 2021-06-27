@@ -45,6 +45,9 @@ QGpioI2CSlave::QGpioI2CSlave(uint8_t address, uint8_t delay, uint8_t busNum, uin
 {
     /* Open i2c-bus devcice */
     m_fd = open(QString("/dev/i2c-%1").arg(m_busNum).toLatin1().data(), O_RDWR);
+    if (m_fd == -1) {
+        qWarning() << "Error opening i2C file" << QString("/dev/i2c-%1").arg(m_busNum) << "error:" << errno;
+    }
 }
 
 QGpioI2CSlave::~QGpioI2CSlave()
@@ -199,7 +202,6 @@ ssize_t QGpioI2CSlave::ioctlWriteHelper(unsigned int iaddr, const void *buf, siz
 
 /*
 **	@brief	:	read #len bytes data from #device #iaddr to #buf
-**	#device	:	I2CDevice struct, must call i2c_device_init first
 **	#iaddr	:	i2c_device internal address will read data from this address, no address set zero
 **	#buf	:	i2c data will read to here
 **	#len	:	how many data to read, lenght must less than or equal to buf size
@@ -213,6 +215,7 @@ ssize_t QGpioI2CSlave::readHelper(unsigned int iaddr, void *buf, size_t len)
 
     /* Set i2c slave address */
     if (addressSelect(m_address, m_tenBitsAddress) == false) {
+        qWarning("readHelper: cant select address: %x %x", m_address, m_tenBitsAddress);
         return -1;
     }
 
@@ -334,11 +337,11 @@ void QGpioI2CSlave::internalAddressConvert(unsigned int iaddr, unsigned int len,
 bool QGpioI2CSlave::addressSelect(unsigned long dev_addr, unsigned long tenbit)
 {
     if (m_fd == -1) {
+        qWarning("QGpioI2CSlave::addressSelect: i2c file not opened");
         return false;
     }
     /* Set i2c device address bit */
     if (ioctl(m_fd, I2C_TENBIT, tenbit)) {
-
         qWarning("Set I2C_TENBIT failed");
         return false;
     }

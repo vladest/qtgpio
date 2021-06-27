@@ -68,53 +68,37 @@ MotorDriver::~MotorDriver()
 }
 
 void MotorDriver::forward(Motors::MotorsEnum motors) {
-    Motors::MotorsEnum motors_ = motors;
-    while (motors_ != Motors::MOTOR_NONE) {
-        for (const auto& motor : m_motors) {
-            if (motor->motor() == (motors_ & 1)) {
-                motor->forward();
-            }
+    for (const auto& motor : m_motors) {
+        if (motor->motor() & motors) {
+            motor->forward();
         }
-        motors_ = static_cast<Motors::MotorsEnum>(static_cast<int>(motors_) >> 1);
     }
 }
 
 void MotorDriver::stop(Motors::MotorsEnum motors)
-{
-    Motors::MotorsEnum motors_ = motors;
-    while (motors_ != Motors::MOTOR_NONE) {
-        for (const auto& motor : m_motors) {
-            if (motor->motor() == (motors_ & 1)) {
-                motor->stop();
-            }
+{ 
+    for (const auto& motor : m_motors) {
+        if (motor->motor() & motors) {
+            motor->stop();
         }
-        motors_ = static_cast<Motors::MotorsEnum>(static_cast<int>(motors_) >> 1);
     }
 }
 
 void MotorDriver::reverse(Motors::MotorsEnum motors)
 {
-    Motors::MotorsEnum motors_ = motors;
-    while (motors_ != Motors::MOTOR_NONE) {
-        for (const auto& motor : m_motors) {
-            if (motor->motor() == (motors_ & 1)) {
-                motor->reverse();
-            }
+    for (const auto& motor : m_motors) {
+        if (motor->motor() & motors) {
+            motor->reverse();
         }
-        motors_ = static_cast<Motors::MotorsEnum>(static_cast<int>(motors_) >> 1);
     }
 }
 
 void MotorDriver::setSpeed(Motors::MotorsEnum motors, float speed)
 {
-    Motors::MotorsEnum motors_ = motors;
-    while (motors_ != Motors::MOTOR_NONE) {
-        for (const auto& motor : m_motors) {
-            if (motor->motor() == (motors_ & 1)) {
-                motor->setSpeed(speed);
-            }
+    for (const auto& motor : m_motors) {
+        if (motor->motor() & motors) {
+            motor->setSpeed(speed);
         }
-        motors_ = static_cast<Motors::MotorsEnum>(static_cast<int>(motors_) >> 1);
     }
 }
 
