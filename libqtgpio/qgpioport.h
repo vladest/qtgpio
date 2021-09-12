@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QPointer>
 #include "qgpio.h"
+#include <gpiod.h>
 
 class QGpioPort : public QObject
 {

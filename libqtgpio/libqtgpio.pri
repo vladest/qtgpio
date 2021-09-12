@@ -1,7 +1,7 @@
 QT -= gui
 CONFIG += c++17
 
-INCLUDEPATH += $$PWD $$PWD/rpi $$PWD/hats $$PWD/services
+INCLUDEPATH += $$PWD $$PWD/rpi $$PWD/hats $$PWD/services $$PWD/displays
 
 SOURCES += \
     $$PWD/qgpio.cpp \
@@ -11,6 +11,8 @@ SOURCES += \
     $$PWD/rpi/bcm2835.c \
     $$PWD/hats/pca9685/pca9685.cpp \
     $$PWD/hats/ultraborg/ultraborg.cpp \
+    $$PWD/services/buttons/QwiicButton.cpp \
+    $$PWD/services/displays/GroveLEDMatrix.cpp \
     $$PWD/services/motor/motor_driver_hat.cpp \
     #$$PWD/services/motor/motor_hat_stepper.cpp \
     $$PWD/services/motor/pca9685_board.cpp \
@@ -35,6 +37,8 @@ HEADERS += \
     $$PWD/rpi/bcm2835.h \
     $$PWD/hats/pca9685/pca9685.h \
     $$PWD/hats/ultraborg/ultraborg.h \
+    $$PWD/services/buttons/QwiicButton.h \
+    $$PWD/services/displays/GroveLEDMatrix.h \
     $$PWD/services/motor/motor_driver_hat.h \
     #$$PWD/services/motor/motor_hat_stepper.h \
     $$PWD/services/motor/pca9685_board.h \

@@ -7,6 +7,7 @@
 #include <linux/i2c-dev.h>
 #include <i2c/smbus.h>
 #include <QDebug>
+#include <QThread>
 
 /* I2C default delay */
 #define I2C_DEFAULT_DELAY 1
@@ -70,6 +71,12 @@ void QGpioI2CSlave::setGpioParent(QGpio *gpio)
 
 void QGpioI2CSlave::i2cSetup()
 {
+    int ret = ioctl(m_fd, I2C_SLAVE_FORCE, m_address);
+    if (ret < 0) {
+        fprintf(stderr, "I2C ioctl(I2C_SLAVE_FORCE) error %d\n", errno);
+    }
+    QThread::usleep(500);
+
 //    bcm2835_i2c_setClockDivider(m_clockDivider);
 
 //    // sets read timeout
@@ -148,7 +155,8 @@ ssize_t QGpioI2CSlave::ioctlReadHelper(unsigned int iaddr, void *buf, size_t len
 
 ssize_t QGpioI2CSlave::ioctlWriteHelper(unsigned int iaddr, const void *buf, size_t len)
 {
-    ssize_t remain = len;
+    // take in account commands w/o data
+    ssize_t remain = len == 0 ? 1 : len;
     size_t size = 0, cnt = 0;
     const unsigned char *buffer = static_cast<const unsigned char *>(buf);
     unsigned char delay = GET_I2C_DELAY(m_delay);
@@ -167,7 +175,9 @@ ssize_t QGpioI2CSlave::ioctlWriteHelper(unsigned int iaddr, const void *buf, siz
         internalAddressConvert(iaddr, m_internalAddrBytes, tmp_buf);
 
         /* Connect write data after device internal address */
-        memcpy(tmp_buf + m_internalAddrBytes, buffer, size);
+        if (buffer != nullptr) { // check if just a command should be sent
+            memcpy(tmp_buf + m_internalAddrBytes, buffer, size);
+        }
 
         /* Fill kernel ioctl i2c_msg */
         memset(&ioctl_msg, 0, sizeof(ioctl_msg));
@@ -182,8 +192,7 @@ ssize_t QGpioI2CSlave::ioctlWriteHelper(unsigned int iaddr, const void *buf, siz
         ioctl_data.msgs	=	&ioctl_msg;
 
         if (ioctl(m_fd, I2C_RDWR, (unsigned long)&ioctl_data) == -1) {
-
-            perror("Ioctl write i2c error:");
+            perror("Ioctl write i2c error");
             return -1;
         }
 
@@ -225,7 +234,6 @@ ssize_t QGpioI2CSlave::readHelper(unsigned int iaddr, void *buf, size_t len)
 
     /* Write internal address to devide  */
     if (write(m_fd, addr, m_internalAddrBytes) != m_internalAddrBytes) {
-
         qWarning("Write i2c internal address error");
         return -1;
     }
@@ -236,7 +244,7 @@ ssize_t QGpioI2CSlave::readHelper(unsigned int iaddr, void *buf, size_t len)
     /* Read count bytes data from int_addr specify address */
     if ((cnt = read(m_fd, buf, len)) == -1) {
 
-        qWarning("Read i2c data error");
+        qWarning() << "Read i2c data error" << errno << "from file id" << m_fd;
         return -1;
     }
 
@@ -252,9 +260,10 @@ ssize_t QGpioI2CSlave::readHelper(unsigned int iaddr, void *buf, size_t len)
 **	#len	:	buf data length without '/0'
 **	@return	: 	success return write data length, failed -1
 */
-ssize_t QGpioI2CSlave::writeHelper(unsigned int iaddr, const void *buf, size_t len)
+ssize_t   __attribute__ ((optimize(0))) QGpioI2CSlave::writeHelper(unsigned int iaddr, const void *buf, size_t len)
 {
-    ssize_t remain = len;
+    // take in account commands w/o data
+    ssize_t remain = len == 0 ? 1 : len;
     ssize_t ret;
     size_t cnt = 0, size = 0;
     const unsigned char *buffer = static_cast<const unsigned char *>(buf);
@@ -275,14 +284,18 @@ ssize_t QGpioI2CSlave::writeHelper(unsigned int iaddr, const void *buf, size_t l
         internalAddressConvert(iaddr, m_internalAddrBytes, tmp_buf);
 
         /* Copy data to tmp_buf */
-        memcpy(tmp_buf + m_internalAddrBytes, buffer, size);
+        if (buffer != nullptr) { // check if just a command should be sent
+            memcpy(tmp_buf + m_internalAddrBytes, buffer, size);
+        }
 
         /* Write to buf content to i2c device length  is address length and
                 write buffer length */
         ret = write(m_fd, tmp_buf, m_internalAddrBytes + size);
-        if (ret == -1 || (size_t)ret != m_internalAddrBytes + size)
-        {
-            qWarning("I2C write error:");
+        if (ret == -1 || (size_t)ret != m_internalAddrBytes + size) {
+            if (ret == -1) {
+                perror("write i2c error");
+            }
+            qWarning() << "I2C write error to iaddress" << iaddr << ret;
             return -1;
         }
 
@@ -362,13 +375,19 @@ uint8_t QGpioI2CSlave::i2cRead(uint8_t reg) {
 
     i2cSetup();
 
-    auto rc = readHelper(reg, buffer, 1);
+    auto rc = readHelper(reg, buffer, 2);
 
-    if (rc == -1 || reg != buffer[0]) {
-        qWarning() << "8 bit. reading error. rc:" << rc << "wanted:" << Qt::hex  << reg << "got:" << buffer[0] <<
-            "i2c address" << m_address;
+    if (rc == -1 || 0xff == buffer[1]) {
+//        qWarning() << "8 bit. reading error. rc:" << rc << "wanted:" << Qt::hex  << reg
+//                   << "got:" << buffer[0] << buffer[1]
+//                   << "i2c address" << m_address;
+        return 0xff;
+    } else {
+//        qWarning() << "8 bit. reading ok. rc:" << rc << "wanted:" << Qt::hex  << reg
+//                   << "got:" << buffer[0] << buffer[1]
+//                   << "i2c address" << m_address;
     }
-    return buffer[1];
+    return buffer[0];
 }
 
 uint16_t QGpioI2CSlave::i2cRead16(uint8_t reg) {
@@ -376,11 +395,12 @@ uint16_t QGpioI2CSlave::i2cRead16(uint8_t reg) {
 
     i2cSetup();
 
-    auto rc = readHelper(reg, buffer, 2);
+    auto rc = readHelper(reg, buffer, 3);
 
     if (rc == -1 || reg != buffer[0]) {
-        qWarning() << "16 bit. reading error. rc:" << rc << "wanted:" << Qt::hex  << reg << "got:" << buffer[0] << buffer[1] <<
-            "i2c address" << m_address;
+        qWarning() << "16 bit. reading error. rc:" << rc << "wanted:" << Qt::hex  << reg
+                   << "got:" << buffer[0] << buffer[1] << buffer[2]
+                   << "i2c address" << m_address;
     }
     return (uint16_t) ((uint16_t) buffer[1] << 8 | (uint16_t) buffer[2]);
 }
@@ -390,11 +410,12 @@ uint32_t QGpioI2CSlave::i2cRead32(uint8_t reg) {
 
     i2cSetup();
 
-    auto rc = readHelper(reg, buffer, 4);
+    auto rc = readHelper(reg, buffer, 5);
 
     if (rc == -1 || reg != buffer[0]) {
-        qWarning() << "32 bit. reading error. rc:" << rc << "wanted:" << Qt::hex  << reg << "got:" << buffer <<
-            "i2c address" << m_address;
+        qWarning() << "32 bit. reading error. rc:" << rc << "wanted:" << Qt::hex  << reg
+                   << "got:" << buffer[0] << buffer[1] << buffer[2] << buffer[3] << buffer[4]
+                   << "i2c address" << m_address;
     }
     return (uint32_t) ((uint32_t) buffer[1] << 24 | (uint32_t) buffer[2] << 16 | (uint32_t) buffer[3] << 8 | (uint32_t) buffer[4]);
 }
@@ -430,6 +451,12 @@ uint8_t QGpioI2CSlave::i2cWrite(uint8_t reg, uint16_t data, uint16_t data1) {
 
     auto rc = writeHelper(reg, &buffer, 4);
     return rc;
+}
+
+ssize_t QGpioI2CSlave::i2cWrite(uint8_t reg, const void *buf, size_t len)
+{
+    i2cSetup();
+    return writeHelper(reg, buf, len);
 }
 
 uint8_t QGpioI2CSlave::i2cWrite(uint8_t reg, uint32_t data) {

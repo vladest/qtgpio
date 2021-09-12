@@ -125,12 +125,12 @@ QPointer<QGpioI2CSlave> QGpio::allocateI2CSlave(uint8_t address, uint8_t delay, 
         _i2c->setGpioParent(this);
         m_i2cSlavesAllocated[address] = _i2c;
         if (m_i2cSlavesAllocated.size() == 1) {
-            //int rc = bcm2835_i2c_begin();
             uint8_t read0 = _i2c->i2cRead(0x00);
             qWarning() << "i2c begin" << read0 << " address:" << Qt::hex << address << "bus:" << Qt::hex << busNum;
         }
     } else {
-        qWarning() << "I2C address:" << Qt::hex << address << "at bus"  << Qt::hex << busNum << "already allocated";
+        uint8_t read0 = _i2c->i2cRead(0x00);
+        qWarning() << "I2C address:" << Qt::hex << address << "at bus"  << Qt::hex << busNum << "already allocated" << read0;
     }
     return _i2c;
 }

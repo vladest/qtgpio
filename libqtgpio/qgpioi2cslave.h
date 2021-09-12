@@ -21,6 +21,7 @@ public:
     uint8_t i2cWrite(uint8_t reg, uint16_t data);
     uint8_t i2cWrite(uint8_t reg, uint32_t data);
     uint8_t i2cWrite(uint8_t reg, uint16_t data, uint16_t data1);
+    ssize_t i2cWrite(uint8_t reg, const void *buf, size_t len);
 private:
     void i2cSetup();
     ssize_t ioctlReadHelper(unsigned int iaddr, void *buf, size_t len);
@@ -39,7 +40,7 @@ private:
     uint16_t m_timeout = 0;
     uint16_t m_ioctlFlags = 0;      // i2c ioctl operations flags
     uint8_t m_tenBitsAddress = 0;      // i2c is 10 bit device address
-    uint32_t m_bytesPerPage = 8;    // i2c max number of bytes per page, 1K/2K 8, 4K/8K/16K 16, 32K/64K 32 etc
+    uint32_t m_bytesPerPage = 8*1024;    // i2c max number of bytes per page, 1K/2K 8, 4K/8K/16K 16, 32K/64K 32 etc
 
     QPointer<QGpio> m_gpio;
     int m_fd = -1;
