@@ -12,6 +12,7 @@
 #include "qgpio.h"
 #include "qgpioport.h"
 #include "qgpioi2cslave.h"
+#include "qgpiospi.h"
 
 #include <QMutexLocker>
 #include <QFile>
@@ -262,8 +263,3 @@ void QGpio::inputEventThreadFunc() {
     }
     qDebug() << Q_FUNC_INFO << " thread stopped";
 }
-
-//uint32_t *QGpio::getGpioMap()
-//{
-//    return (uint32_t *)m_gpioMap;
-//}

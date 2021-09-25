@@ -7,6 +7,7 @@ SOURCES += \
     $$PWD/qgpio.cpp \
     $$PWD/qgpioi2cslave.cpp \
     $$PWD/qgpioport.cpp \
+    $$PWD/qgpiospi.cpp \
     $$PWD/rpi/rpicpuinfo.cpp \
     $$PWD/rpi/bcm2835.c \
     $$PWD/hats/pca9685/pca9685.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     $$PWD/qgpio.h \
     $$PWD/qgpioi2cslave.h \
     $$PWD/qgpioport.h \
+    $$PWD/qgpiospi.h \
     $$PWD/rpi/rpicpuinfo.h \
     $$PWD/rpi/bcm2835.h \
     $$PWD/hats/pca9685/pca9685.h \

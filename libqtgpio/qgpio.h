@@ -4,11 +4,10 @@
 #include <QObject>
 #include <QPointer>
 #include <QMap>
-//#include "rpi/rpicpuinfo.h"
-//#include "rpi/bcm2835.h"
 
 class QGpioPort;
 class QGpioI2CSlave;
+class QGpioSPI;
 
 class QGpio: public QObject
 {
@@ -76,6 +75,8 @@ public:
     QPointer<QGpioI2CSlave> allocateI2CSlave(uint8_t address, uint8_t delay, uint8_t busNum, uint16_t timeout);
     void deallocateI2CSlave(uint8_t address);
     void deallocateI2CSlave(QPointer<QGpioI2CSlave> i2cSlave);
+
+    QPointer<QGpioSPI> allocateSPI(uint8_t busNum, uint16_t timeout);
 
     /**
      * @brief getGpioMap
