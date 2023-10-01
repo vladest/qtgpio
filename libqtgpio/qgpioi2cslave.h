@@ -1,5 +1,4 @@
-#ifndef I2CDEVICE_H
-#define I2CDEVICE_H
+#pragma once
 
 #include <QObject>
 #include "qgpio.h"
@@ -8,12 +7,13 @@
 class QGpioI2CSlave: public QObject //for QPointer
 {
 public:
-    explicit QGpioI2CSlave(uint8_t address, uint8_t delay = 0, uint8_t busNum = 0, uint16_t timeout = 40000);
+    explicit QGpioI2CSlave(uint8_t address, uint16_t delay = 0, uint8_t busNum = 0, uint16_t timeout = 40000);
     virtual ~QGpioI2CSlave();
     uint8_t address() const;
     void setGpioParent(QGpio *gpio);
 
-    uint8_t i2cRead(uint8_t reg);
+    int32_t i2cRead(unsigned int iaddr, void *buf, size_t len);
+    uint8_t i2cRead(uint8_t reg, bool zeroByteIsCommand = true);
     uint16_t i2cRead16(uint8_t reg);
     uint32_t i2cRead32(uint8_t reg);
 
@@ -22,6 +22,7 @@ public:
     uint8_t i2cWrite(uint8_t reg, uint32_t data);
     uint8_t i2cWrite(uint8_t reg, uint16_t data, uint16_t data1);
     ssize_t i2cWrite(uint8_t reg, const void *buf, size_t len);
+
 private:
     void i2cSetup();
     ssize_t ioctlReadHelper(unsigned int iaddr, void *buf, size_t len);
@@ -45,5 +46,3 @@ private:
     QPointer<QGpio> m_gpio;
     int m_fd = -1;
 };
-
-#endif // I2CDEVICE_H

@@ -1,19 +1,17 @@
-#ifndef SERVOBASE_H
-#define SERVOBASE_H
+#pragma once
 
 #include <QObject>
 
 class ServoBase : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(KnownServos)
 public:
     enum KnownServos {
         MG995,
         MG90S,
         SG90
     };
-
-    Q_ENUM(KnownServos)
 
     struct ServoParameters {
         KnownServos servo;
@@ -89,5 +87,3 @@ private:
 
     float m_actuactionRange = 180.0f;
 };
-
-#endif // SERVOBASE_H

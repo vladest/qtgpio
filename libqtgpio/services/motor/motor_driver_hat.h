@@ -36,10 +36,10 @@ public:
                           QObject *parent = nullptr);
     virtual ~MotorPCA9685();
 
-    void forward() override;
-    void stop() override;
-    void reverse() override;
-    void setSpeed(float speed) override;
+    void forward(MotorsFlags motors = ALL_MOTORS) override;
+    void stop(MotorsFlags motors = ALL_MOTORS) override;
+    void reverse(MotorsFlags motors = ALL_MOTORS) override;
+    void setSpeed(float speed, MotorsFlags motors = ALL_MOTORS) override;
 
 private:
     uint8_t m_speedChannel;

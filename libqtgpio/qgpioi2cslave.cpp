@@ -38,7 +38,7 @@ static void i2c_delay(unsigned char msec)
 // maximum counter for read repeats if NACK
 static const int kMaxCount = 10;
 
-QGpioI2CSlave::QGpioI2CSlave(uint8_t address, uint8_t delay, uint8_t busNum, uint16_t timeout) :
+QGpioI2CSlave::QGpioI2CSlave(uint8_t address, uint16_t delay, uint8_t busNum, uint16_t timeout) :
       m_address(address),
       m_busNum(busNum),
       m_delay(delay),
@@ -76,14 +76,6 @@ void QGpioI2CSlave::i2cSetup()
         fprintf(stderr, "I2C ioctl(I2C_SLAVE_FORCE) error %d\n", errno);
     }
     QThread::usleep(500);
-
-//    bcm2835_i2c_setClockDivider(m_clockDivider);
-
-//    // sets read timeout
-//    volatile uint32_t* stimeout = bcm2835_bsc1 + BCM2835_BSC_CLKT / 4;
-//    bcm2835_peri_write(stimeout, m_timeout);
-//    bcm2835_i2c_setSlaveAddress(m_address);
-    //udelay(500);
 }
 
     /**
@@ -369,8 +361,13 @@ bool QGpioI2CSlave::addressSelect(unsigned long dev_addr, unsigned long tenbit)
     return true;
 }
 
+int32_t QGpioI2CSlave::i2cRead(unsigned int iaddr, void *buf, size_t len)
+{
+    i2cSetup();
+    return readHelper(iaddr, buf, len);
+}
 
-uint8_t QGpioI2CSlave::i2cRead(uint8_t reg) {
+uint8_t QGpioI2CSlave::i2cRead(uint8_t reg, bool zeroByteIsCommand) {
     uint8_t buffer[2] = { 0, 0 };
 
     i2cSetup();
@@ -387,7 +384,8 @@ uint8_t QGpioI2CSlave::i2cRead(uint8_t reg) {
 //                   << "got:" << buffer[0] << buffer[1]
 //                   << "i2c address" << m_address;
     }
-    return buffer[0];
+    // buffer[0] should contains command
+    return zeroByteIsCommand ? buffer[1] : buffer[0];
 }
 
 uint16_t QGpioI2CSlave::i2cRead16(uint8_t reg) {

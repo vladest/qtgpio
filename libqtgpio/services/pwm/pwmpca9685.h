@@ -1,5 +1,4 @@
-#ifndef PWMPCA9685_H
-#define PWMPCA9685_H
+#pragma once
 
 #include <stdint.h>
 
@@ -23,4 +22,3 @@ public:
 
 };
 
-#endif // PWMPCA9685_H

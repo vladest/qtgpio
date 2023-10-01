@@ -22,10 +22,10 @@ public:
     explicit MotorMC33886(int speedPort, int p1, int p2, QObject *parent = nullptr);
     virtual ~MotorMC33886();
 
-    void forward() override;
-    void stop() override;
-    void reverse() override;
-    void setSpeed(float speed) override;
+    void forward(MotorsFlags motors = ALL_MOTORS) override;
+    void stop(MotorsFlags motors = ALL_MOTORS) override;
+    void reverse(MotorsFlags motors = ALL_MOTORS) override;
+    void setSpeed(float speed, MotorsFlags motors = ALL_MOTORS) override;
 
 private:
     void setMotor(QGpio::GpioValue a1, QGpio::GpioValue a2);

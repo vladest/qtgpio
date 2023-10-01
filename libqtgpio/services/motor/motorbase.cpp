@@ -5,7 +5,7 @@ MotorBase::MotorBase(QObject *parent) : QObject(parent)
 
 }
 
-void MotorBase::setSpeed(float speed)
+void MotorBase::setSpeed(float speed, MotorsFlags motors)
 {
     if (speed != m_speed) {
         m_speed = speed;
@@ -13,7 +13,7 @@ void MotorBase::setSpeed(float speed)
     }
 }
 
-float MotorBase::speed() const
+float MotorBase::speed(MotorsFlags motors) const
 {
     return m_speed;
 }

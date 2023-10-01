@@ -1,5 +1,4 @@
-#ifndef QGPIO_H
-#define QGPIO_H
+#pragma once
 
 #include <QObject>
 #include <QPointer>
@@ -77,6 +76,7 @@ public:
     void deallocateI2CSlave(QPointer<QGpioI2CSlave> i2cSlave);
 
     QPointer<QGpioSPI> allocateSPI(uint8_t busNum, uint16_t timeout);
+    QGpioI2CSlave* getI2CSlave(uint8_t address) const;
 
     /**
      * @brief getGpioMap
@@ -119,5 +119,3 @@ private:
     QThread* m_eventsRunner = nullptr;
     int m_epollFd = -1;
 };
-
-#endif // QGPIO_H

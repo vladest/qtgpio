@@ -2,7 +2,7 @@ include(../example.pri)
 
 SOURCES += \
         main.cpp \
-        buzzer.cpp
+        imu.cpp
 
 HEADERS += \
-    buzzer.h
+    imu.h

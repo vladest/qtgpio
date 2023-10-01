@@ -28,22 +28,22 @@ void MotorMC33886::setMotor(QGpio::GpioValue a1, QGpio::GpioValue a2)
     m_port2->setValue(a2);
 }
 
-void MotorMC33886::forward()
+void MotorMC33886::forward(MotorsFlags motors)
 {
     setMotor(QGpio::VALUE_HIGH, QGpio::VALUE_LOW);
 }
 
-void MotorMC33886::stop()
+void MotorMC33886::stop(MotorsFlags motors)
 {
     setMotor(QGpio::VALUE_LOW, QGpio::VALUE_LOW);
 }
 
-void MotorMC33886::reverse()
+void MotorMC33886::reverse(MotorsFlags motors)
 {
     setMotor(QGpio::VALUE_LOW, QGpio::VALUE_HIGH);
 }
 
-void MotorMC33886::setSpeed(float speed) {
+void MotorMC33886::setSpeed(float speed, MotorsFlags motors) {
     if (speed < 0.0f || speed > 100.0f)
         return;
     MotorBase::setSpeed(speed);

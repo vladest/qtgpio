@@ -19,6 +19,7 @@
 #include <QDateTime>
 #include <QThread>
 #include <QDebug>
+#include <QTextStream>
 
 //volatile uint32_t* QGpio::m_gpioMap = bcm2835_gpio;
 QMap<int, QPointer<QGpioPort> > QGpio::m_PortsAllocated;
@@ -127,11 +128,11 @@ QPointer<QGpioI2CSlave> QGpio::allocateI2CSlave(uint8_t address, uint8_t delay, 
         m_i2cSlavesAllocated[address] = _i2c;
         if (m_i2cSlavesAllocated.size() == 1) {
             uint8_t read0 = _i2c->i2cRead(0x00);
-            qWarning() << "i2c begin" << read0 << " address:" << Qt::hex << address << "bus:" << Qt::hex << busNum;
+            qWarning() << "i2c begin" << read0 << " address:" << Qt::hex << address << "bus:" << busNum;
         }
     } else {
         uint8_t read0 = _i2c->i2cRead(0x00);
-        qWarning() << "I2C address:" << Qt::hex << address << "at bus"  << Qt::hex << busNum << "already allocated" << read0;
+        qWarning() << "I2C address:" << Qt::hex << address << "at bus" << busNum << "already allocated" << read0;
     }
     return _i2c;
 }
@@ -153,11 +154,13 @@ void QGpio::deallocateI2CSlave(QPointer<QGpioI2CSlave> i2cSlave)
     }
 }
 
+QGpioI2CSlave *QGpio::getI2CSlave(uint8_t address) const
+{
+     return m_i2cSlavesAllocated.value(address, nullptr).get();
+}
+
 QGpio::QGpio() : QObject(nullptr)
 {
-#if defined(ROBOCORE_ON_DESKTOP)
-    bcm2835_set_debug(1);
-#endif
     setupSigHandler();
     //qDebug() << m_rpiCpuInfo.boardString();
 }

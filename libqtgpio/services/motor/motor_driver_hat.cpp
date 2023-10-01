@@ -19,8 +19,9 @@ MotorPCA9685::~MotorPCA9685()
     stop();
 }
 
-void MotorPCA9685::forward()
+void MotorPCA9685::forward(MotorsFlags motors)
 {
+    qDebug() << "motor forward at" << m_speedChannel << m_inChannel1 << m_inChannel2;
     m_motorActive = true;
 
     m_pca9685.setPwmDutyCycle(m_speedChannel, speed());
@@ -28,13 +29,13 @@ void MotorPCA9685::forward()
     m_pca9685.setLevel(m_inChannel2, 1);
 }
 
-void MotorPCA9685::stop()
+void MotorPCA9685::stop(MotorsFlags motors)
 {
     m_motorActive = false;
     m_pca9685.setPwmDutyCycle(m_speedChannel, 0);
 }
 
-void MotorPCA9685::reverse()
+void MotorPCA9685::reverse(MotorsFlags motors)
 {
     m_motorActive = true;
 
@@ -43,7 +44,7 @@ void MotorPCA9685::reverse()
     m_pca9685.setLevel(m_inChannel2, 0);
 }
 
-void MotorPCA9685::setSpeed(float speed) {
+void MotorPCA9685::setSpeed(float speed, MotorsFlags motors) {
     if (speed < 0.0f || speed > 100.0f)
         return;
     MotorBase::setSpeed(speed);
@@ -68,6 +69,7 @@ MotorDriver::~MotorDriver()
 }
 
 void MotorDriver::forward(Motors::MotorsEnum motors) {
+    qDebug() << __PRETTY_FUNCTION__ << motors;
     for (const auto& motor : m_motors) {
         if (motor->motor() & motors) {
             motor->forward();
@@ -84,8 +86,8 @@ void MotorDriver::stop(Motors::MotorsEnum motors)
     }
 }
 
-void MotorDriver::reverse(Motors::MotorsEnum motors)
-{
+void MotorDriver::reverse(Motors::MotorsEnum motors) {
+    qDebug() << __PRETTY_FUNCTION__ << motors;
     for (const auto& motor : m_motors) {
         if (motor->motor() & motors) {
             motor->reverse();

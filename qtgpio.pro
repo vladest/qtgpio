@@ -1,5 +1,7 @@
 TEMPLATE  = subdirs
 CONFIG   += ordered
-SUBDIRS = examples
-include(libqtgpio/libqtgpio.pri)
-include(examples/examples.pro)
+SUBDIRS = libqtgpio examples
+
+plugin.depends = libqtgpio
+import.depends = libqtgpio
+

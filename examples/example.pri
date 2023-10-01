@@ -1,9 +1,17 @@
 QT -= gui
-
+QT += core
 CONFIG += c++17 console
 CONFIG -= app_bundle
+MOC_DIR = .moc
+OBJECTS_DIR = .obj
 
-include(../libqtgpio/libqtgpio.pri)
+message($$PWD)
+QTGPIO_PATH = $$PWD/../libqtgpio
+message($$QTGPIO_PATH)
+INCLUDEPATH += $$PWD $$QTGPIO_PATH $$QTGPIO_PATH/rpi $$QTGPIO_PATH/hats $$QTGPIO_PATH/services $$QTGPIO_PATH/displays
+
+LIBS += -L$$QTGPIO_PATH -lqgpio
+PRE_TARGETDEPS += $$QTGPIO_PATH/libqgpio.a
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings

@@ -54,7 +54,7 @@ void QwiicButton::init(uint8_t bus, uint8_t address, uint8_t delay)
     QGpio* gpio = QGpio::getInstance();
     if (gpio->init() == QGpio::INIT_OK) {
         m_i2c = gpio->allocateI2CSlave(address, delay, bus, 40000);
-        qWarning() << "BUTTON VID:" << Qt::hex << m_i2c->i2cRead(ID);
+        qWarning() << "BUTTON VID:" << Qt::hex << m_i2c->i2cRead(ID, false);
         start(NormalPriority);
     }
 }
@@ -62,7 +62,7 @@ void QwiicButton::init(uint8_t bus, uint8_t address, uint8_t delay)
 bool QwiicButton::isPressed(bool& isOk)
 {
     StatusRegisterBitField statusRegister;
-    statusRegister.byteWrapped = m_i2c->i2cRead(BUTTON_STATUS);
+    statusRegister.byteWrapped = m_i2c->i2cRead(BUTTON_STATUS, false);
     if (statusRegister.byteWrapped == 0xff) {
         isOk = false;
         return false;
@@ -75,7 +75,7 @@ bool QwiicButton::isPressed(bool& isOk)
 bool QwiicButton::hasBeenClicked()
 {
     StatusRegisterBitField statusRegister;
-    statusRegister.byteWrapped = m_i2c->i2cRead(BUTTON_STATUS);
+    statusRegister.byteWrapped = m_i2c->i2cRead(BUTTON_STATUS, false);
     if (statusRegister.byteWrapped == 0xff) {
         return false;
     } else {
@@ -130,7 +130,7 @@ uint8_t QwiicButton::disableClickedInterrupt()
 bool QwiicButton::available()
 {
     StatusRegisterBitField buttonStatus;
-    buttonStatus.byteWrapped = m_i2c->i2cRead(BUTTON_STATUS);
+    buttonStatus.byteWrapped = m_i2c->i2cRead(BUTTON_STATUS, false);
     //qWarning() << "available" << Qt::hex << buttonStatus.byteWrapped;
     if (buttonStatus.byteWrapped == 0xff) {
         return false;
@@ -141,7 +141,7 @@ bool QwiicButton::available()
 uint8_t QwiicButton::clearEventBits()
 {
     StatusRegisterBitField buttonStatus;
-    buttonStatus.byteWrapped = m_i2c->i2cRead(BUTTON_STATUS);
+    buttonStatus.byteWrapped = m_i2c->i2cRead(BUTTON_STATUS, false);
     buttonStatus.isPressed = 0;
     buttonStatus.hasBeenClicked = 0;
     buttonStatus.eventAvailable = 0;
@@ -164,14 +164,14 @@ uint8_t QwiicButton::resetInterruptConfig()
 bool QwiicButton::isPressedQueueFull()
 {
     QueueStatusBitField pressedQueueStatus;
-    pressedQueueStatus.byteWrapped = m_i2c->i2cRead(PRESSED_QUEUE_STATUS);
+    pressedQueueStatus.byteWrapped = m_i2c->i2cRead(PRESSED_QUEUE_STATUS, false);
     return pressedQueueStatus.isFull;
 }
 
 bool QwiicButton::isPressedQueueEmpty()
 {
     QueueStatusBitField pressedQueueStatus;
-    pressedQueueStatus.byteWrapped = m_i2c->i2cRead(PRESSED_QUEUE_STATUS);
+    pressedQueueStatus.byteWrapped = m_i2c->i2cRead(PRESSED_QUEUE_STATUS, false);
     return pressedQueueStatus.isEmpty;
 }
 
